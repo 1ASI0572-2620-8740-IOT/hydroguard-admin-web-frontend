@@ -10,7 +10,7 @@ const sessions = new Map();
 const send = (res, status, body) => {
   res.writeHead(status, {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Correlation-Id',
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
     ...(body === undefined ? {} : { 'Content-Type': 'application/json; charset=utf-8' }),
   });
