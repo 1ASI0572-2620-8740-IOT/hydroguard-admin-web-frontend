@@ -1,0 +1,113 @@
+<div class="create-page-wrapper">
+  <div class="page-container">
+    <div class="breadcrumb-nav">
+      <button mat-button (click)="onCancel()" class="btn-back">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Volver a Operarios</span>
+      </button>
+    </div>
+
+    <mat-card class="form-card">
+      <div class="card-header">
+        <div class="header-icon">
+          <mat-icon>person_add</mat-icon>
+        </div>
+        <div class="header-text">
+          <div class="flow-pill">
+            <mat-icon class="flow-pill-icon">flag</mat-icon>
+            <span>PASO 1 DEL FLUJO DE INCORPORACIÓN</span>
+          </div>
+          <h1 class="card-title">Registrar Nueva Cuenta de Operario</h1>
+          <p class="card-description">
+            Cree la identidad del operario con su contraseña definitiva. Posteriormente, configure
+            su perfil y asignaciones en Configuration para emitir el código de primer acceso.
+          </p>
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert-error" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="operatorForm" (ngSubmit)="onSubmit()" class="create-form">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Nombre Completo del Operario</mat-label>
+          <input matInput formControlName="displayName" placeholder="Ej. Marcelino Valencia" />
+          <mat-icon matPrefix>badge</mat-icon>
+          @if (operatorForm.get('displayName')?.hasError('required')) {
+            <mat-error>El nombre del operario es obligatorio</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Identificador de Acceso (Usuario)</mat-label>
+          <input matInput formControlName="identifier" placeholder="Ej. marcelino.valencia" />
+          <mat-icon matPrefix>alternate_email</mat-icon>
+          @if (operatorForm.get('identifier')?.hasError('required')) {
+            <mat-error>El identificador es obligatorio</mat-error>
+          } @else if (operatorForm.get('identifier')?.hasError('pattern')) {
+            <mat-error>Solo se permiten letras, números, puntos, guiones y subguiones</mat-error>
+          }
+          <mat-hint
+            >Este identificador se utilizará para el inicio de sesión posterior en la app
+            móvil.</mat-hint
+          >
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Contraseña Definitiva</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="Mínimo 6 caracteres"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button
+            type="button"
+            mat-icon-button
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (operatorForm.get('password')?.hasError('required')) {
+            <mat-error>La contraseña es obligatoria</mat-error>
+          } @else if (operatorForm.get('password')?.hasError('minlength')) {
+            <mat-error>La contraseña debe tener al menos 6 caracteres</mat-error>
+          }
+          <mat-hint
+            >El operario no tendrá que cambiar esta contraseña en el alcance actual.</mat-hint
+          >
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="loading()">
+            Cancelar
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="loading()"
+            class="btn-submit"
+          >
+            @if (loading()) {
+              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+              <span>Guardando...</span>
+            } @else {
+              <span class="btn-inner">
+                <mat-icon>save</mat-icon>
+                <span>Crear Cuenta de Operario</span>
+              </span>
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>
