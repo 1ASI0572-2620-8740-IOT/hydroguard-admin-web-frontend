@@ -1,0 +1,130 @@
+<div class="table-container mat-elevation-z1">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <table mat-table [dataSource]="users()" class="users-mat-table">
+    <ng-container matColumnDef="displayName">
+      <th mat-header-cell *matHeaderCellDef>Nombre del Operario</th>
+      <td mat-cell *matCellDef="let user" class="font-medium">
+        <div class="user-identity">
+          <div class="user-avatar-initial" [class.avatar-inactive]="!user.isActive">
+            {{ user.displayName ? user.displayName.charAt(0).toUpperCase() : 'O' }}
+          </div>
+          <div class="user-name-col">
+            <span class="user-full-name">{{ user.displayName }}</span>
+            <span class="user-role-label">Operador IoT de Campo</span>
+          </div>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="identifier">
+      <th mat-header-cell *matHeaderCellDef>Identificador</th>
+      <td mat-cell *matCellDef="let user">
+        <div class="identifier-box">
+          <mat-icon class="identifier-icon">alternate_email</mat-icon>
+          <code class="identifier-chip">{{ user.identifier }}</code>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Estado</th>
+      <td mat-cell *matCellDef="let user">
+        @if (user.isActive) {
+          <span class="badge badge-active">
+            <span class="status-dot dot-active"></span>
+            <span>Activo</span>
+          </span>
+        } @else {
+          <span class="badge badge-inactive">
+            <span class="status-dot dot-inactive"></span>
+            <span>Inactivo</span>
+          </span>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>Fecha de Alta</th>
+      <td mat-cell *matCellDef="let user" class="date-cell">
+        <div class="date-box">
+          <mat-icon class="date-icon">event</mat-icon>
+          <span>{{ user.createdAt ? (user.createdAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="text-right">Acciones</th>
+      <td mat-cell *matCellDef="let user" class="text-right actions-cell">
+        <div class="actions-group">
+          <button
+            mat-icon-button
+            class="btn-table-action btn-action-view"
+            matTooltip="Ver detalle y vínculos"
+            (click)="onSelect(user)"
+            aria-label="Ver detalle"
+          >
+            <mat-icon>visibility</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            class="btn-table-action btn-action-code"
+            matTooltip="Gestionar código de primer acceso"
+            (click)="onAccessCode(user, $event)"
+            aria-label="Código de primer acceso"
+          >
+            <mat-icon>vpn_key</mat-icon>
+          </button>
+
+          @if (user.isActive) {
+            <button
+              mat-icon-button
+              class="btn-table-action btn-action-deactivate"
+              matTooltip="Dar de baja (desactivar)"
+              (click)="onDeactivate(user, $event)"
+              aria-label="Desactivar operario"
+            >
+              <mat-icon>person_off</mat-icon>
+            </button>
+          }
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: displayedColumns"
+      class="table-row-clickable"
+      tabindex="0"
+      role="button"
+      (click)="onSelect(row)"
+      (keydown.enter)="onSelect(row)"
+      (keydown.space)="onSelect(row); $event.preventDefault()"
+    ></tr>
+
+    <tr class="mat-row empty-row" *matNoDataRow>
+      <td class="mat-cell empty-cell" [attr.colspan]="displayedColumns.length">
+        @if (!loading()) {
+          <div class="empty-state-inner">
+            <mat-icon class="empty-icon">person_search</mat-icon>
+            <p>No se encontraron cuentas de operarios registradas.</p>
+          </div>
+        }
+      </td>
+    </tr>
+  </table>
+
+  <mat-paginator
+    [length]="total()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageIndex()"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPage($event)"
+    showFirstLastButtons
+  ></mat-paginator>
+</div>

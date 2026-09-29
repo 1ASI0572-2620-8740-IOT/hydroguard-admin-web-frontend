@@ -1,0 +1,71 @@
+<main class="page-content">
+  <div class="page-header">
+    <div class="header-titles">
+      <div class="title-row">
+        <h1 class="page-title">Gestión de Cuentas de Operarios</h1>
+        @if (!loading() && total() > 0) {
+          <span class="count-pill">{{ total() }} operarios</span>
+        }
+      </div>
+      <p class="page-subtitle">
+        Administración de identidades, credenciales definitivas y códigos de primer acceso para la
+        app de campo.
+      </p>
+    </div>
+    <button mat-flat-button (click)="onCreateOperator()" class="btn-create">
+      <mat-icon>person_add</mat-icon>
+      <span>Nuevo Operario</span>
+    </button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-banner alert-banner-error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <div class="filter-card mat-elevation-z1">
+    <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+      <mat-label>Buscar por nombre o identificador</mat-label>
+      <input
+        matInput
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="onSearchChange()"
+        placeholder="Ej. Marcelino o marcelino.valencia"
+      />
+      <mat-icon matPrefix>search</mat-icon>
+      @if (searchTerm) {
+        <button mat-icon-button matSuffix (click)="searchTerm = ''; onSearchChange()">
+          <mat-icon>clear</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="select-field" subscriptSizing="dynamic">
+      <mat-label>Estado de Cuenta</mat-label>
+      <mat-select [(ngModel)]="statusFilter" (selectionChange)="onStatusFilterChange()">
+        <mat-option value="ALL">Todos los estados</mat-option>
+        <mat-option value="ACTIVE">Solo Activos</mat-option>
+        <mat-option value="INACTIVE">Solo Inactivos (Baja)</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="loadOperators()" class="btn-refresh">
+      <mat-icon>refresh</mat-icon>
+      <span>Actualizar</span>
+    </button>
+  </div>
+
+  <hg-users-table
+    [users]="operators()"
+    [total]="total()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageIndex()"
+    [loading]="loading()"
+    (pageChange)="onPageChange($event)"
+    (userSelected)="onUserSelected($event)"
+    (deactivateUser)="onDeactivateUser($event)"
+    (manageAccessCode)="onManageAccessCode($event)"
+  ></hg-users-table>
+</main>
