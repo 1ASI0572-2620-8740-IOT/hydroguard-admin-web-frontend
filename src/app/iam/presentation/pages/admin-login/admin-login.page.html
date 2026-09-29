@@ -1,0 +1,105 @@
+<div class="login-wrapper">
+  <mat-card class="login-card">
+    <div class="login-header">
+      <div class="brand-logo">
+        <mat-icon class="water-icon">water_drop</mat-icon>
+      </div>
+      <h1 class="brand-title">Hydro<span class="brand-accent">Guard</span></h1>
+      <p class="brand-subtitle">Panel administrativo</p>
+    </div>
+
+    @if (registrationCreated()) {
+      <div class="alert-success" role="status">
+        <mat-icon>check_circle</mat-icon>
+        <span>Empresa y administrador registrados correctamente. Ya puede iniciar sesión.</span>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="alert-error" role="alert">
+        <mat-icon class="alert-icon">error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Correo del administrador</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          placeholder="administrador@empresa.com"
+          autocomplete="email"
+        />
+        <mat-icon matPrefix>mail</mat-icon>
+        @if (loginForm.get('email')?.hasError('required')) {
+          <mat-error>El correo es obligatorio</mat-error>
+        } @else if (loginForm.get('email')?.hasError('email')) {
+          <mat-error>Ingrese un correo válido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          [type]="hidePassword() ? 'password' : 'text'"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+        <mat-icon matPrefix>lock</mat-icon>
+        <button
+          type="button"
+          mat-icon-button
+          matSuffix
+          (click)="togglePasswordVisibility()"
+          [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+        >
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (loginForm.get('password')?.hasError('required')) {
+          <mat-error>La contraseña es obligatoria</mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        class="submit-button"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+          <span>Ingresando...</span>
+        } @else {
+          <span class="btn-inner">
+            <mat-icon>login</mat-icon>
+            <span>Iniciar Sesión</span>
+          </span>
+        }
+      </button>
+    </form>
+
+    <div class="registration-entry">
+      <div>
+        <strong>¿Su empresa todavía no utiliza HydroGuard?</strong>
+        <p>Registre la empresa y cree su cuenta administradora.</p>
+      </div>
+      <button mat-stroked-button type="button" (click)="goToRegistration()">
+        Registrar empresa
+      </button>
+    </div>
+
+    <div class="login-footer">
+      <p class="role-notice">
+        <mat-icon class="info-icon">info</mat-icon>
+        <span>
+          Acceso restringido a Administradores. Si eres Operario de campo, por favor accede mediante
+          la aplicación móvil HydroGuard.
+        </span>
+      </p>
+    </div>
+  </mat-card>
+</div>
