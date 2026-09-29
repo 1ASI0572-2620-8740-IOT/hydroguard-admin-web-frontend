@@ -55,10 +55,12 @@ export class UsersTableComponent {
   }
 
   onDeactivate(user: OperatorAccount, event: Event): void {
+    event.stopPropagation();
     this.deactivateUser.emit(user.id);
   }
 
   onAccessCode(user: OperatorAccount, event: Event): void {
+    event.stopPropagation();
     this.manageAccessCode.emit(user.id);
   }
 }
