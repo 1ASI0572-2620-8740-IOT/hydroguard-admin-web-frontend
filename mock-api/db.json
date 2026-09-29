@@ -1,0 +1,418 @@
+{
+  "organizations": [
+    {
+      "id": "org-textile",
+      "name": "Textil San Juan S.A.C.",
+      "ruc": "20512345678",
+      "phone": "+51987654321",
+      "segment": "TEXTILE",
+      "status": "ACTIVE",
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "updatedAt": "2026-09-01T08:00:00.000Z"
+    },
+    {
+      "id": "org-hydroponic",
+      "name": "Hidroverde Pachacámac S.A.C.",
+      "ruc": "20687654321",
+      "phone": "+51976543210",
+      "segment": "HYDROPONIC",
+      "status": "ACTIVE",
+      "createdAt": "2026-09-02T08:00:00.000Z",
+      "updatedAt": "2026-09-02T08:00:00.000Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr-admin-textile",
+      "organizationId": "org-textile",
+      "identifier": "admin.textil@hydroguard.pe",
+      "username": "admin.textil@hydroguard.pe",
+      "displayName": "Administrador Textil",
+      "password": "adminpassword123",
+      "role": "ROLE_ADMIN",
+      "roles": [
+        "ROLE_ADMIN"
+      ],
+      "status": "ACTIVE",
+      "email": "admin.textil@hydroguard.pe",
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "updatedAt": "2026-09-01T08:00:00.000Z"
+    },
+    {
+      "id": "usr-admin-hydroponic",
+      "organizationId": "org-hydroponic",
+      "identifier": "admin.hidro@hydroguard.pe",
+      "username": "admin.hidro@hydroguard.pe",
+      "displayName": "Administrador Hidropónico",
+      "password": "adminpassword123",
+      "role": "ROLE_ADMIN",
+      "roles": [
+        "ROLE_ADMIN"
+      ],
+      "status": "ACTIVE",
+      "email": "admin.hidro@hydroguard.pe",
+      "createdAt": "2026-09-02T08:00:00.000Z",
+      "updatedAt": "2026-09-02T08:00:00.000Z"
+    },
+    {
+      "id": "usr-marcelino",
+      "organizationId": "org-textile",
+      "identifier": "marcelino.valencia",
+      "username": "marcelino.valencia",
+      "displayName": "Marcelino Valencia",
+      "password": "operadorpassword123",
+      "role": "ROLE_OPERATOR",
+      "roles": [
+        "ROLE_OPERATOR"
+      ],
+      "status": "ACTIVE",
+      "email": "mvalencia@textilperu.com",
+      "createdAt": "2026-09-05T10:00:00.000Z",
+      "updatedAt": "2026-09-05T10:00:00.000Z"
+    },
+    {
+      "id": "usr-lucia",
+      "organizationId": "org-hydroponic",
+      "identifier": "lucia.paredes",
+      "username": "lucia.paredes",
+      "displayName": "Lucía Paredes",
+      "password": "operadorpassword123",
+      "role": "ROLE_OPERATOR",
+      "roles": [
+        "ROLE_OPERATOR"
+      ],
+      "status": "ACTIVE",
+      "email": "lparedes@hidroverde.pe",
+      "createdAt": "2026-09-10T14:30:00.000Z",
+      "updatedAt": "2026-09-10T14:30:00.000Z"
+    },
+    {
+      "id": "usr-carlos",
+      "organizationId": "org-hydroponic",
+      "identifier": "carlos.mendoza",
+      "username": "carlos.mendoza",
+      "displayName": "Carlos Mendoza",
+      "password": "operadorpassword123",
+      "role": "ROLE_OPERATOR",
+      "roles": [
+        "ROLE_OPERATOR"
+      ],
+      "status": "ACTIVE",
+      "email": "cmendoza@agrohuerto.pe",
+      "createdAt": "2026-09-15T09:15:00.000Z",
+      "updatedAt": "2026-09-15T09:15:00.000Z"
+    },
+    {
+      "id": "usr-jorge",
+      "organizationId": "org-textile",
+      "identifier": "jorge.quispe",
+      "username": "jorge.quispe",
+      "displayName": "Jorge Quispe (Baja)",
+      "password": "operadorpassword123",
+      "role": "ROLE_OPERATOR",
+      "roles": [
+        "ROLE_OPERATOR"
+      ],
+      "status": "INACTIVE",
+      "email": "jquispe@textilperu.com",
+      "createdAt": "2026-08-20T11:00:00.000Z",
+      "updatedAt": "2026-09-02T16:00:00.000Z"
+    },
+    {
+      "id": "usr-314d1b2f-a308-4d32-8545-265854438762",
+      "organizationId": "org-hydroponic",
+      "identifier": "juan.perez",
+      "username": "juan.perez",
+      "displayName": "Juan Perez Quispe",
+      "password": "juanperez123",
+      "role": "ROLE_OPERATOR",
+      "roles": [
+        "ROLE_OPERATOR"
+      ],
+      "status": "ACTIVE",
+      "createdAt": "2026-09-29T20:29:47.750Z",
+      "updatedAt": "2026-09-29T20:29:47.750Z"
+    },
+    {
+      "id": "usr-eff7192e-2d79-416c-a196-835e344e3ed8",
+      "organizationId": "org-textile",
+      "identifier": "francisco.valencia",
+      "username": "francisco.valencia",
+      "displayName": "Francisco Valencia",
+      "password": "franciscovalencia123",
+      "role": "ROLE_OPERATOR",
+      "roles": [
+        "ROLE_OPERATOR"
+      ],
+      "status": "ACTIVE",
+      "createdAt": "2026-09-30T04:55:38.334Z",
+      "updatedAt": "2026-09-30T04:55:38.334Z"
+    }
+  ],
+  "groups": [
+    {
+      "id": "grp-1",
+      "organizationId": "org-textile",
+      "name": "Planta Textil San Juan",
+      "purpose": "Acondicionamiento y tratamiento de efluentes de teñido textil",
+      "segment": "TEXTILE",
+      "createdAt": "2026-09-01T08:30:00.000Z"
+    },
+    {
+      "id": "grp-2",
+      "organizationId": "org-hydroponic",
+      "name": "Módulo Hidropónico Pachacámac",
+      "purpose": "Preparación de solución nutritiva para cultivo de lechuga NFT",
+      "segment": "HYDROPONIC",
+      "createdAt": "2026-09-02T09:00:00.000Z"
+    }
+  ],
+  "reservoirs": [
+    {
+      "id": "res-101",
+      "organizationId": "org-textile",
+      "groupId": "grp-1",
+      "code": "POZA-01",
+      "name": "Poza de Acondicionamiento #1",
+      "reservoirType": "SUMP",
+      "location": "Área de teñido y acabado - Nave B"
+    },
+    {
+      "id": "res-102",
+      "organizationId": "org-textile",
+      "groupId": "grp-1",
+      "code": "POZA-02",
+      "name": "Poza de Acondicionamiento #2",
+      "reservoirType": "SUMP",
+      "location": "Área de tintorería - Nave C"
+    },
+    {
+      "id": "res-201",
+      "organizationId": "org-hydroponic",
+      "groupId": "grp-2",
+      "code": "TANQUE-NFT-A",
+      "name": "Tanque Nutritivo Lechuga NFT-A",
+      "reservoirType": "TANK",
+      "location": "Invernadero principal módulo 1"
+    },
+    {
+      "id": "res-202",
+      "organizationId": "org-hydroponic",
+      "groupId": "grp-2",
+      "code": "TANQUE-NFT-B",
+      "name": "Tanque Nutritivo Berros NFT-B",
+      "reservoirType": "TANK",
+      "location": "Invernadero módulo 2"
+    },
+    {
+      "id": "res-203",
+      "organizationId": "org-textile",
+      "groupId": "grp-1",
+      "code": "POZA-03",
+      "name": "Poza de Acondicionamiento #3",
+      "reservoirType": "SUMP",
+      "location": "Área de pruebas - sin responsable"
+    }
+  ],
+  "devices": [
+    {
+      "id": "dev-101",
+      "organizationId": "org-textile",
+      "serialNumber": "ESP32-HG-TX-001",
+      "deviceModel": "HydroGuard-Pro-V1",
+      "reservoirId": "res-101",
+      "operatingEnvironment": "ACADEMIC_PROTOTYPE",
+      "lifecycleStatus": "ACTIVE_ASSIGNED",
+      "availability": "ONLINE",
+      "lastCommunicationAt": "2026-09-28T22:30:00.000Z"
+    },
+    {
+      "id": "dev-102",
+      "organizationId": "org-textile",
+      "serialNumber": "ESP32-HG-TX-002",
+      "deviceModel": "HydroGuard-Pro-V1",
+      "reservoirId": "res-102",
+      "operatingEnvironment": "SIMULATION",
+      "lifecycleStatus": "ACTIVE_ASSIGNED",
+      "availability": "ONLINE",
+      "lastCommunicationAt": "2026-09-28T22:35:00.000Z"
+    },
+    {
+      "id": "dev-201",
+      "organizationId": "org-hydroponic",
+      "serialNumber": "ESP32-HG-HP-001",
+      "deviceModel": "HydroGuard-Pro-V1",
+      "reservoirId": "res-201",
+      "operatingEnvironment": "ACADEMIC_PROTOTYPE",
+      "lifecycleStatus": "ACTIVE_ASSIGNED",
+      "availability": "DELAYED",
+      "lastCommunicationAt": "2026-09-28T22:15:00.000Z"
+    },
+    {
+      "id": "dev-202",
+      "organizationId": "org-hydroponic",
+      "serialNumber": "ESP32-HG-HP-002",
+      "deviceModel": "HydroGuard-Pro-V1",
+      "reservoirId": "res-202",
+      "operatingEnvironment": "SIMULATION",
+      "lifecycleStatus": "ACTIVE_ASSIGNED",
+      "availability": "OFFLINE",
+      "lastCommunicationAt": "2026-09-27T10:00:00.000Z"
+    },
+    {
+      "id": "dev-203",
+      "organizationId": "org-textile",
+      "serialNumber": "ESP32-HG-TX-003",
+      "deviceModel": "HydroGuard-Pro-V1",
+      "reservoirId": "res-203",
+      "operatingEnvironment": "ACADEMIC_PROTOTYPE",
+      "lifecycleStatus": "ACTIVE_UNASSIGNED",
+      "availability": "OFFLINE",
+      "lastCommunicationAt": "2026-09-20T10:00:00.000Z"
+    }
+  ],
+  "operatorProfiles": [
+    {
+      "id": "prof-1",
+      "organizationId": "org-textile",
+      "userId": "usr-marcelino",
+      "groupId": "grp-1",
+      "status": "ACTIVE",
+      "createdAt": "2026-09-05T10:30:00.000Z"
+    },
+    {
+      "id": "prof-2",
+      "organizationId": "org-hydroponic",
+      "userId": "usr-lucia",
+      "groupId": "grp-2",
+      "status": "ACTIVE",
+      "createdAt": "2026-09-10T15:00:00.000Z"
+    },
+    {
+      "id": "prof-3",
+      "organizationId": "org-hydroponic",
+      "userId": "usr-carlos",
+      "groupId": "grp-2",
+      "status": "PENDING_FIRST_ACCESS",
+      "createdAt": "2026-09-15T09:30:00.000Z"
+    },
+    {
+      "id": "prof-4",
+      "organizationId": "org-textile",
+      "userId": "usr-jorge",
+      "groupId": "grp-1",
+      "status": "INACTIVE",
+      "createdAt": "2026-08-20T11:30:00.000Z"
+    }
+  ],
+  "deviceAssignments": [
+    {
+      "id": "asgn-1",
+      "organizationId": "org-textile",
+      "operatorProfileId": "prof-1",
+      "reservoirId": "res-101",
+      "reservoirName": "Poza de Acondicionamiento #1",
+      "deviceId": "dev-101",
+      "deviceSerialNumber": "ESP32-HG-TX-001",
+      "status": "ACTIVE",
+      "assignedAt": "2026-09-05T10:35:00.000Z"
+    },
+    {
+      "id": "asgn-2",
+      "organizationId": "org-textile",
+      "operatorProfileId": "prof-1",
+      "reservoirId": "res-102",
+      "reservoirName": "Poza de Acondicionamiento #2",
+      "deviceId": "dev-102",
+      "deviceSerialNumber": "ESP32-HG-TX-002",
+      "status": "ACTIVE",
+      "assignedAt": "2026-09-06T08:00:00.000Z"
+    },
+    {
+      "id": "asgn-3",
+      "organizationId": "org-hydroponic",
+      "operatorProfileId": "prof-2",
+      "reservoirId": "res-201",
+      "reservoirName": "Tanque Nutritivo Lechuga NFT-A",
+      "deviceId": "dev-201",
+      "deviceSerialNumber": "ESP32-HG-HP-001",
+      "status": "ACTIVE",
+      "assignedAt": "2026-09-10T15:10:00.000Z"
+    },
+    {
+      "id": "asgn-4",
+      "organizationId": "org-hydroponic",
+      "operatorProfileId": "prof-3",
+      "reservoirId": "res-202",
+      "reservoirName": "Tanque Nutritivo Berros NFT-B",
+      "deviceId": "dev-202",
+      "deviceSerialNumber": "ESP32-HG-HP-002",
+      "status": "ACTIVE",
+      "assignedAt": "2026-09-15T09:40:00.000Z"
+    },
+    {
+      "id": "asgn-5",
+      "organizationId": "org-textile",
+      "operatorProfileId": "prof-4",
+      "reservoirId": "res-203",
+      "reservoirName": "Poza de Acondicionamiento #3",
+      "deviceId": "dev-203",
+      "deviceSerialNumber": "ESP32-HG-TX-003",
+      "status": "CLOSED",
+      "assignedAt": "2026-08-20T11:35:00.000Z"
+    }
+  ],
+  "firstAccessCodes": [
+    {
+      "id": "code-1",
+      "organizationId": "org-textile",
+      "code": "HG-9482X1",
+      "status": "USED",
+      "operatorProfileId": "prof-1",
+      "operatorAccountId": "usr-marcelino",
+      "userId": "usr-marcelino",
+      "generatedAt": "2026-09-05T10:40:00.000Z",
+      "usedAt": "2026-09-05T11:00:00.000Z"
+    },
+    {
+      "id": "code-2",
+      "organizationId": "org-hydroponic",
+      "code": "HG-74B9K2",
+      "status": "USED",
+      "operatorProfileId": "prof-2",
+      "operatorAccountId": "usr-lucia",
+      "userId": "usr-lucia",
+      "generatedAt": "2026-09-10T15:15:00.000Z",
+      "usedAt": "2026-09-10T15:45:00.000Z"
+    },
+    {
+      "id": "code-3",
+      "organizationId": "org-hydroponic",
+      "code": "HG-31Z8P9",
+      "status": "ACTIVE",
+      "operatorProfileId": "prof-3",
+      "operatorAccountId": "usr-carlos",
+      "userId": "usr-carlos",
+      "generatedAt": "2026-09-15T09:45:00.000Z"
+    },
+    {
+      "id": "code-4",
+      "organizationId": "org-textile",
+      "code": "HG-19Q7R4",
+      "status": "REVOKED",
+      "operatorProfileId": "prof-4",
+      "operatorAccountId": "usr-jorge",
+      "userId": "usr-jorge",
+      "generatedAt": "2026-08-20T11:40:00.000Z",
+      "revokedAt": "2026-09-02T16:00:00.000Z"
+    }
+  ],
+  "configurations": [],
+  "measurements": [],
+  "processes": [],
+  "actuations": [],
+  "alerts": [],
+  "incidents": [],
+  "traceabilityEntries": [],
+  "reports": []
+}
