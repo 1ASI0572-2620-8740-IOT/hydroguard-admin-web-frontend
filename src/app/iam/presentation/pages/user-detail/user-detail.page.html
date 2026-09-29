@@ -1,0 +1,231 @@
+<div class="detail-page-wrapper">
+  <div class="page-container">
+    <div class="breadcrumb-nav">
+      <button mat-button (click)="onBack()" class="btn-back">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Volver a Operarios</span>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <p>Cargando información del operario...</p>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="alert-error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    @if (detail(); as data) {
+      <mat-card class="detail-card main-account-card">
+        <div class="card-top-header">
+          <div class="user-main-info">
+            <div class="user-avatar-circle" [class.avatar-inactive]="!data.account.isActive">
+              {{
+                data.account.displayName ? data.account.displayName.charAt(0).toUpperCase() : 'O'
+              }}
+            </div>
+            <div>
+              <div class="title-with-badge">
+                <h1 class="user-name">{{ data.account.displayName }}</h1>
+                @if (data.account.isActive) {
+                  <span class="badge badge-active">
+                    <span class="status-dot dot-active"></span>
+                    <span>Activo</span>
+                  </span>
+                } @else {
+                  <span class="badge badge-inactive">
+                    <span class="status-dot dot-inactive"></span>
+                    <span>Inactivo (Baja)</span>
+                  </span>
+                }
+              </div>
+              <div class="user-login">
+                <span class="login-label">Identificador:</span>
+                <span class="identifier-pill">
+                  <mat-icon>alternate_email</mat-icon>
+                  <code>{{ data.account.identifier }}</code>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-actions">
+            <button mat-flat-button (click)="onGoToFirstAccess()" class="btn-action-primary">
+              <mat-icon>vpn_key</mat-icon>
+              <span>Código de Primer Acceso</span>
+            </button>
+
+            @if (data.account.isActive) {
+              <button
+                mat-stroked-button
+                color="warn"
+                (click)="onDeactivate()"
+                class="btn-action-warn"
+              >
+                <mat-icon>person_off</mat-icon>
+                <span>Dar de Baja</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="account-meta-grid">
+          <div class="meta-card">
+            <div class="meta-icon-box">
+              <mat-icon>tag</mat-icon>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">ID de Cuenta</span>
+              <span class="meta-value">{{ data.account.id }}</span>
+            </div>
+          </div>
+
+          <div class="meta-card">
+            <div class="meta-icon-box">
+              <mat-icon>event</mat-icon>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Fecha de Creación</span>
+              <span class="meta-value">{{
+                data.account.createdAt ? (data.account.createdAt | date: 'dd/MM/yyyy HH:mm') : '—'
+              }}</span>
+            </div>
+          </div>
+
+          <div class="meta-card">
+            <div class="meta-icon-box">
+              <mat-icon>update</mat-icon>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Última Actualización</span>
+              <span class="meta-value">{{
+                data.account.updatedAt ? (data.account.updatedAt | date: 'dd/MM/yyyy HH:mm') : '—'
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="detail-card mat-elevation-z1">
+        <div class="section-title-wrapper">
+          <div class="icon-bubble">
+            <mat-icon>hub</mat-icon>
+          </div>
+          <div>
+            <h2 class="section-title">Vínculos Operativos (Solo Lectura)</h2>
+            <p class="section-subtitle">
+              Resumen de grupo, perfil y asignaciones consultado desde Configuration. IAM no
+              modifica estos vínculos.
+            </p>
+          </div>
+        </div>
+
+        <div class="links-grid">
+          <div class="link-card">
+            <div class="link-card-header">
+              <mat-icon class="link-icon">group_work</mat-icon>
+              <span class="link-type">Grupo de Trabajo</span>
+            </div>
+            @if (data.accessSummary.hasGroup) {
+              <div class="link-data">
+                <span class="link-name">{{ data.accessSummary.groupName }}</span>
+                <span class="link-id">ID: {{ data.accessSummary.groupId }}</span>
+              </div>
+            } @else {
+              <div class="link-empty">
+                <mat-icon>warning</mat-icon>
+                <span>Sin grupo asociado. Debe configurarse en Configuration.</span>
+              </div>
+            }
+          </div>
+
+          <div class="link-card">
+            <div class="link-card-header">
+              <mat-icon class="link-icon">badge</mat-icon>
+              <span class="link-type">Perfil de Operario</span>
+            </div>
+            @if (data.accessSummary.hasProfile) {
+              <div class="link-data">
+                <span class="link-name">Perfil Registrado</span>
+                <span class="link-id">ID: {{ data.accessSummary.operatorProfileId }}</span>
+                <span class="profile-status-chip">
+                  Estado: {{ data.accessSummary.profileStatus }}
+                </span>
+              </div>
+            } @else {
+              <div class="link-empty">
+                <mat-icon>warning</mat-icon>
+                <span>Sin perfil administrativo creado.</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <h3 class="subsection-title">Asignaciones Reservorio - Dispositivo</h3>
+        @if (data.accessSummary.assignments.length > 0) {
+          <div class="assignments-list">
+            @for (asgn of data.accessSummary.assignments; track asgn.assignmentId) {
+              <div class="assignment-item">
+                <div class="asgn-reservoir">
+                  <mat-icon>water</mat-icon>
+                  <div>
+                    <span class="asgn-title">{{ asgn.reservoirName }}</span>
+                    <span class="asgn-sub">ID: {{ asgn.reservoirId }}</span>
+                  </div>
+                </div>
+                <div class="asgn-arrow">
+                  <mat-icon>link</mat-icon>
+                </div>
+                <div class="asgn-device">
+                  <mat-icon>developer_board</mat-icon>
+                  <div>
+                    <span class="asgn-title">{{ asgn.deviceSerialNumber }}</span>
+                    <span class="asgn-sub">ID: {{ asgn.deviceId }}</span>
+                  </div>
+                </div>
+                <div class="asgn-status">
+                  <span class="badge" [class.badge-active]="asgn.status === 'ACTIVE'">
+                    {{ asgn.status }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-assignments">
+            <mat-icon>info</mat-icon>
+            <span>No cuenta con asignaciones activas de reservorios y dispositivos.</span>
+          </div>
+        }
+
+        <div class="precondition-status" [class.ready]="data.accessSummary.isReadyForFirstAccess">
+          <mat-icon>
+            {{ data.accessSummary.isReadyForFirstAccess ? 'check_circle' : 'pending' }}
+          </mat-icon>
+          <div>
+            <strong>
+              {{
+                data.accessSummary.isReadyForFirstAccess
+                  ? 'Listo para Código de Primer Acceso'
+                  : 'Precondición Incompleta para Primer Acceso'
+              }}
+            </strong>
+            <p>
+              {{
+                data.accessSummary.isReadyForFirstAccess
+                  ? 'El perfil cuenta con grupo asignado y al menos una unidad reservorio-dispositivo completa.'
+                  : 'Para emitir el código se requiere cuenta, grupo, perfil PENDING_FIRST_ACCESS y al menos una asignación activa.'
+              }}
+            </p>
+          </div>
+        </div>
+      </mat-card>
+    }
+  </div>
+</div>
