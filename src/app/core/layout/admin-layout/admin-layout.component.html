@@ -1,0 +1,51 @@
+<div class="admin-shell">
+  <header class="main-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a class="brand-link" routerLink="/users" aria-label="HydroGuard Admin Portal">
+          <div class="brand-icon-box">
+            <mat-icon class="brand-drop">water_drop</mat-icon>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Hydro<span class="brand-highlight">Guard</span></span>
+            <span class="brand-pill">ADMIN</span>
+          </div>
+        </a>
+
+        <nav class="header-nav">
+          <a class="nav-item active-nav" routerLink="/users">
+            <mat-icon class="nav-icon">people</mat-icon>
+            <span class="nav-label">Operarios</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <div class="admin-profile-chip">
+          <div class="admin-avatar">
+            <mat-icon>admin_panel_settings</mat-icon>
+          </div>
+          <div class="admin-info">
+            <span class="admin-name">{{ sessionStore.adminIdentifier() || 'Admin' }}</span>
+            <span class="admin-role">Administrador</span>
+          </div>
+        </div>
+
+        <button
+          mat-icon-button
+          class="btn-logout"
+          type="button"
+          aria-label="Cerrar sesión"
+          matTooltip="Cerrar sesión"
+          (click)="signOut()"
+        >
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-content">
+    <router-outlet />
+  </main>
+</div>
