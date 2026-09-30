@@ -1,59 +1,73 @@
-# HydroguardAdminWebFrontend
+# HydroGuard Admin Web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.24.
+Aplicación web multiempresa para la administración de identidades y accesos de HydroGuard. En el alcance actual permite registrar una empresa con su única cuenta administradora, autenticar al administrador, crear y desactivar cuentas de operarios, consultar sus vínculos operativos y gestionar códigos de primer acceso.
 
-## Development server
+La creación de grupos, reservorios, dispositivos y asignaciones pertenece al bounded context de configuración operativa y todavía no está implementada en esta aplicación.
 
-To start a local development server, run:
+## Requisitos
 
-```bash
-ng serve
-```
+- Node.js 22 LTS.
+- npm 11.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Instalación
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Ejecución local
+
+Inicia el backend mock:
 
 ```bash
-ng generate --help
+npm run mock:api
 ```
 
-## Building
+Comprueba su estado en `http://127.0.0.1:3000/`. Debe responder con `status: "UP"`. El puerto 3000 expone solamente la API; no contiene la interfaz gráfica.
 
-To build the project run:
+En otra terminal, inicia Angular:
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Abre `http://127.0.0.1:4200/`. Desde el acceso se puede registrar una empresa junto con su único administrador. Otras empresas también pueden registrarse y mantienen sus usuarios y recursos separados mediante `organizationId`.
 
-## Running unit tests
+El frontend consume rutas `/api/v1`. Durante el desarrollo, [proxy.conf.json](proxy.conf.json) dirige `/api` hacia el mock local; en producción se conserva la misma ruta relativa para integrarse con el backend real.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+El registro usa `POST /api/v1/organization-registrations`. Recibe los datos de la empresa —nombre, RUC, teléfono y un solo segmento— y los del administrador —nombre, correo y contraseña—. El acceso posterior usa el correo del administrador y su contraseña.
+
+El mock persiste los registros en `mock-api/db.json`; las contraseñas visibles allí son únicamente datos locales de desarrollo. En el backend real, la creación de empresa y administrador debe ejecutarse en una sola transacción, el RUC y el correo deben tener restricciones únicas, la relación empresa-administrador debe garantizar uno a uno y la contraseña debe almacenarse mediante un hash seguro. La autorización del backend debe derivar siempre la empresa desde la sesión y nunca confiar en un `organizationId` enviado por el cliente.
+
+### Cuentas de demostración
+
+| Empresa                      | Segmento    | Correo                       | Contraseña         |
+| :--------------------------- | :---------- | :--------------------------- | :----------------- |
+| Textil San Juan S.A.C.       | Textil      | `admin.textil@hydroguard.pe` | `adminpassword123` |
+| Hidroverde Pachacámac S.A.C. | Hidropónico | `admin.hidro@hydroguard.pe`  | `adminpassword123` |
+
+Cada cuenta solo puede consultar y modificar los operarios pertenecientes a su empresa.
+
+## Comandos
 
 ```bash
-ng test
+npm start          # Servidor de desarrollo
+npm run mock:api   # Backend mock basado en mock-api/db.json
+npm run build      # Compilación de producción
 ```
 
-## Running end-to-end tests
+## Estructura principal
 
-For end-to-end (e2e) testing, run:
+- `src/app/iam`: bounded context de Identity and Access Management.
+- `src/app/core`: infraestructura y layout compartidos por la aplicación.
+- `src/app/shared`: componentes reutilizables.
+- `mock-api`: servidor y datos para desarrollo local.
+- `src/environments`: configuración de desarrollo y producción.
+
+## Verificación
 
 ```bash
-ng e2e
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+La compilación se genera en `dist/`, directorio excluido del repositorio.
