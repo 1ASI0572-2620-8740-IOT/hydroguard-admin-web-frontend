@@ -1,0 +1,229 @@
+<div class="code-page-wrapper">
+  <div class="page-container">
+    <div class="breadcrumb-nav">
+      <button mat-button (click)="onBack()" class="btn-back">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Volver al Detalle del Operario</span>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <p>Cargando información del código de primer acceso...</p>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="alert-banner alert-error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    @if (successMessage()) {
+      <div class="alert-banner alert-success" role="status">
+        <mat-icon>check_circle</mat-icon>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+
+    @if (detail(); as data) {
+      <mat-card class="code-card mat-elevation-z2">
+        <div class="card-header">
+          <div class="header-icon">
+            <mat-icon>vpn_key</mat-icon>
+          </div>
+          <div>
+            <div class="token-top-tag">CREDENCIAL DE ACCESO MÓVIL</div>
+            <h1 class="card-title">Código de Primer Acceso</h1>
+            <p class="card-subtitle">
+              Operario: <strong>{{ data.account.displayName }}</strong>
+              <span class="user-id-pill">
+                <mat-icon>alternate_email</mat-icon>
+                <code>{{ data.account.identifier }}</code>
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="divider-space"></div>
+
+        @if (code(); as activeCode) {
+          <div
+            class="code-display-box"
+            [class.used]="activeCode.isUsed"
+            [class.revoked]="activeCode.isRevoked"
+          >
+            <div class="voucher-top-bar">
+              <span class="voucher-label">CÓDIGO DE ACTIVACIÓN DE UN SOLO USO</span>
+              @if (activeCode.isActive) {
+                <span class="badge badge-active">
+                  <span class="status-dot dot-active"></span>
+                  <span>Activo</span>
+                </span>
+              } @else if (activeCode.isUsed) {
+                <span class="badge badge-used">
+                  <mat-icon class="badge-mini-icon">done_all</mat-icon>
+                  <span>Utilizado</span>
+                </span>
+              } @else {
+                <span class="badge badge-revoked">
+                  <mat-icon class="badge-mini-icon">block</mat-icon>
+                  <span>Revocado</span>
+                </span>
+              }
+            </div>
+
+            <div class="code-value-row">
+              <div class="code-token-container">
+                <span class="code-string">{{ activeCode.code }}</span>
+                <button
+                  mat-icon-button
+                  class="btn-copy-token"
+                  (click)="copyToClipboard(activeCode.code)"
+                  matTooltip="Copiar código al portapapeles"
+                  aria-label="Copiar código"
+                  [disabled]="activeCode.isUsed || activeCode.isRevoked"
+                >
+                  <mat-icon>{{ copied() ? 'done' : 'content_copy' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="code-meta-row">
+              @if (activeCode.generatedAt) {
+                <div class="meta-tag">
+                  <mat-icon class="meta-icon">schedule</mat-icon>
+                  <span class="meta-title">Generado:</span>
+                  <span class="meta-val">{{
+                    activeCode.generatedAt | date: 'dd/MM/yyyy HH:mm'
+                  }}</span>
+                </div>
+              }
+
+              @if (activeCode.usedAt) {
+                <div class="meta-tag">
+                  <mat-icon class="meta-icon">check_circle</mat-icon>
+                  <span class="meta-title">Usado:</span>
+                  <span class="meta-val">{{ activeCode.usedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              }
+
+              @if (activeCode.revokedAt) {
+                <div class="meta-tag">
+                  <mat-icon class="meta-icon">cancel</mat-icon>
+                  <span class="meta-title">Revocado:</span>
+                  <span class="meta-val">{{
+                    activeCode.revokedAt | date: 'dd/MM/yyyy HH:mm'
+                  }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="empty-code-box">
+            <div class="empty-icon-circle">
+              <mat-icon class="empty-icon">key_off</mat-icon>
+            </div>
+            <h3>No existe ningún código de primer acceso emitido</h3>
+            <p>
+              El operario aún no tiene un código generado para iniciar sesión en la aplicación móvil
+              por primera vez.
+            </p>
+          </div>
+        }
+
+        <div class="checklist-section">
+          <div class="checklist-header">
+            <mat-icon class="checklist-shield">security</mat-icon>
+            <h3 class="checklist-title">Comprobación de Precondiciones de Seguridad</h3>
+          </div>
+          <ul class="checklist-items">
+            <li [class.item-checked]="data.account.isActive">
+              <mat-icon>{{ data.account.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+              <span>Cuenta de Operario en estado activo</span>
+            </li>
+            <li [class.item-checked]="data.accessSummary.hasGroup">
+              <mat-icon>{{ data.accessSummary.hasGroup ? 'check_circle' : 'cancel' }}</mat-icon>
+              <span
+                >Grupo de Trabajo asociado ({{ data.accessSummary.groupName || 'Pendiente' }})</span
+              >
+            </li>
+            <li [class.item-checked]="data.accessSummary.hasProfile">
+              <mat-icon>{{ data.accessSummary.hasProfile ? 'check_circle' : 'cancel' }}</mat-icon>
+              <span>Perfil de Operario creado en Configuration</span>
+            </li>
+            <li [class.item-checked]="data.accessSummary.hasActiveAssignments">
+              <mat-icon>{{
+                data.accessSummary.hasActiveAssignments ? 'check_circle' : 'cancel'
+              }}</mat-icon>
+              <span>
+                Al menos un par reservorio-dispositivo activo ({{
+                  data.accessSummary.assignments.length
+                }}
+                asignado(s))
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="actions-footer">
+          @if (!code() || code()?.isRevoked) {
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="onGenerateCode()"
+              [disabled]="submitting() || !data.accessSummary.isReadyForFirstAccess"
+              class="btn-footer-action"
+            >
+              @if (submitting()) {
+                <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+                <span>Generando...</span>
+              } @else {
+                <span class="btn-inner">
+                  <mat-icon>add_moderator</mat-icon>
+                  <span>{{
+                    code()?.isRevoked
+                      ? 'Generar Código de Reemplazo'
+                      : 'Generar Código de Primer Acceso'
+                  }}</span>
+                </span>
+              }
+            </button>
+          }
+
+          @if (code()?.isActive) {
+            <button
+              mat-stroked-button
+              color="warn"
+              (click)="onRevokeCode()"
+              [disabled]="submitting()"
+              class="btn-footer-action"
+            >
+              @if (submitting()) {
+                <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+                <span>Revocando...</span>
+              } @else {
+                <span class="btn-inner">
+                  <mat-icon>block</mat-icon>
+                  <span>Revocar Código Activo</span>
+                </span>
+              }
+            </button>
+          }
+
+          @if (code()?.isUsed) {
+            <span class="notice-used">
+              <mat-icon>verified</mat-icon>
+              <span
+                >El operario ya completó su primer acceso. Los ingresos posteriores se realizan con
+                su identificador y contraseña definitiva.</span
+              >
+            </span>
+          }
+        </div>
+      </mat-card>
+    }
+  </div>
+</div>

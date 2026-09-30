@@ -1,0 +1,31 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="dialog-icon-box">
+      <span class="material-icons dialog-warn-icon">warning_amber</span>
+    </div>
+    <div class="dialog-title-col">
+      <h2 mat-dialog-title class="dialog-title">{{ data.title }}</h2>
+      <span class="dialog-badge">ACCIÓN IRREVERSIBLE</span>
+    </div>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <p class="dialog-message">{{ data.message }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-stroked-button type="button" class="btn-dialog-cancel" [mat-dialog-close]="false">
+      Cancelar
+    </button>
+    <button
+      mat-flat-button
+      color="warn"
+      type="button"
+      class="btn-dialog-confirm"
+      [mat-dialog-close]="true"
+      cdkFocusInitial
+    >
+      {{ data.confirmLabel }}
+    </button>
+  </mat-dialog-actions>
+</div>
