@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ConfirmationDialogComponent } from '../../../../shared/presentation/confirmation-dialog/confirmation-dialog.component';
 import { getErrorMessage } from '../../../../shared/utils/error-message';
@@ -24,6 +24,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     DatePipe,
     MatCardModule,
     MatButtonModule,

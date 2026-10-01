@@ -1,0 +1,57 @@
+<section class="page">
+  <a mat-button routerLink="/groups">Volver a grupos</a
+  ><hg-query-feedback
+    [loading]="state.loading()"
+    [error]="state.error()"
+    (retry)="load()"
+  /><hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  @if (state.data(); as data) {
+    <header class="page-header">
+      <div>
+        <h1>{{ data.group.name }}</h1>
+        <span class="badge">{{ data.group.status | configurationLabel }}</span>
+      </div>
+      @if (data.group.status === 'ACTIVE') {
+        <div class="actions">
+          <a mat-flat-button routerLink="/reservoirs/new" [queryParams]="{ groupId: id }"
+            >Registrar reservorio</a
+          ><button mat-stroked-button [disabled]="actions.submitting()" (click)="disable()">
+            Desactivar grupo
+          </button>
+        </div>
+      }
+    </header>
+    <div class="panel">
+      <dl>
+        <dt>Segmento heredado</dt>
+        <dd>{{ data.group.segment | configurationLabel }}</dd>
+        <dt>Propósito</dt>
+        <dd>{{ data.group.purpose }}</dd>
+        <dt>Cultivo, proceso o área</dt>
+        <dd>{{ data.group.classification || 'Sin especificar' }}</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h2>Operarios del grupo</h2>
+      @for (member of data.members; track member.profileId) {
+        <p>
+          <a [routerLink]="['/operator-profiles', member.profileId]">{{ member.displayName }}</a> ·
+          {{ member.status | configurationLabel }}
+        </p>
+      } @empty {
+        <p>El grupo aún no tiene perfiles.</p>
+      }
+    </div>
+    <div class="panel">
+      <h2>Reservorios</h2>
+      @for (reservoir of data.reservoirs; track reservoir.id) {
+        <p>
+          <a [routerLink]="['/reservoirs', reservoir.id]">{{ reservoir.name }}</a> ·
+          {{ reservoir.code }} · {{ reservoir.status | configurationLabel }}
+        </p>
+      } @empty {
+        <p>El grupo aún no tiene reservorios.</p>
+      }
+    </div>
+  }
+</section>

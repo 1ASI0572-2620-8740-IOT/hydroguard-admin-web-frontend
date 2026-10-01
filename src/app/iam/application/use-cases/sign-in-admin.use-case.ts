@@ -19,6 +19,7 @@ export class SignInAdminUseCase {
     const response = await this.iamRepo.signIn(request);
 
     if (response.role !== 'ADMINISTRATOR') {
+      await this.iamRepo.signOut(response.token).catch(() => undefined);
       throw new Error(
         'Acceso denegado: Esta aplicación web es exclusiva para el Administrador. Los Operarios deben utilizar la aplicación móvil.',
       );

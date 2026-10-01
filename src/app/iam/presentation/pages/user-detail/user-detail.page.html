@@ -56,6 +56,20 @@
           </div>
 
           <div class="header-actions">
+            @if (data.accessSummary.operatorProfileId) {
+              <a
+                mat-stroked-button
+                [routerLink]="['/operator-profiles', data.accessSummary.operatorProfileId]"
+                >Gestionar perfil y asignaciones</a
+              >
+            } @else if (data.account.isActive) {
+              <a
+                mat-stroked-button
+                routerLink="/operator-profiles/new"
+                [queryParams]="{ userId: data.account.id }"
+                >Completar perfil operativo</a
+              >
+            }
             <button mat-flat-button (click)="onGoToFirstAccess()" class="btn-action-primary">
               <mat-icon>vpn_key</mat-icon>
               <span>Código de Primer Acceso</span>

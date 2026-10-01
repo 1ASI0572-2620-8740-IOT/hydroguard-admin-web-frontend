@@ -407,7 +407,55 @@
       "revokedAt": "2026-09-02T16:00:00.000Z"
     }
   ],
-  "configurations": [],
+  "configurations": [
+    {
+      "id": "cfg-textile-v1",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "configurationVersion": 1,
+      "status": "PUBLISHED",
+      "compatible": true,
+      "incompatibilityReasons": [],
+      "phMin": 6.5,
+      "phMax": 8.5,
+      "temperatureMin": 18,
+      "temperatureMax": 30,
+      "releaseMode": "MANUAL",
+      "createdAt": "2026-09-05T11:10:00.000Z",
+      "publishedAt": "2026-09-05T11:20:00.000Z"
+    },
+    {
+      "id": "cfg-textile-draft-v2",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "configurationVersion": 2,
+      "status": "DRAFT",
+      "compatible": true,
+      "incompatibilityReasons": [],
+      "phMin": 6.8,
+      "phMax": 8.2,
+      "temperatureMin": 20,
+      "temperatureMax": 28,
+      "releaseMode": "MANUAL",
+      "createdAt": "2026-09-28T10:00:00.000Z"
+    },
+    {
+      "id": "cfg-hydroponic-v1",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "configurationVersion": 1,
+      "status": "PUBLISHED",
+      "compatible": false,
+      "incompatibilityReasons": ["Escenario mock: la versión requiere calentamiento y el dispositivo no declara esa capacidad."],
+      "phMin": 5.5,
+      "phMax": 6.5,
+      "temperatureMin": 18,
+      "temperatureMax": 25,
+      "releaseMode": "AUTOMATIC",
+      "createdAt": "2026-09-10T16:00:00.000Z",
+      "publishedAt": "2026-09-10T16:15:00.000Z"
+    }
+  ],
   "measurements": [],
   "processes": [],
   "actuations": [],

@@ -1,0 +1,70 @@
+<div class="panel">
+  <h2>Asignaciones e historial</h2>
+  <div class="table-scroll">
+    <table class="simple-table">
+      <thead>
+        <tr>
+          <th>Reservorio</th>
+          <th>Dispositivo</th>
+          <th>Estado</th>
+          <th>Asignada</th>
+          <th>Cerrada</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (assignment of assignments(); track assignment.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/reservoirs', assignment.reservoirId]">{{
+                assignment.reservoirName
+              }}</a>
+            </td>
+            <td>
+              <a [routerLink]="['/devices', assignment.deviceId]">{{
+                assignment.deviceSerialNumber
+              }}</a>
+            </td>
+            <td>{{ assignment.status | configurationLabel }}</td>
+            <td>{{ assignment.assignedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              {{ assignment.closedAt ? (assignment.closedAt | date: 'dd/MM/yyyy HH:mm') : '—' }}
+            </td>
+            <td>
+              @if (assignment.status === 'ACTIVE' && active()) {
+                <button mat-button [disabled]="disabled()" (click)="close.emit(assignment.id)">
+                  Cerrar asignación
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6">Sin asignaciones.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+@if (active()) {
+  <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
+    <h2>Agregar pares del mismo grupo</h2>
+    <mat-form-field appearance="outline"
+      ><mat-label>Pares disponibles</mat-label
+      ><mat-select formControlName="reservoirIds" multiple>
+        @for (pair of pairs(); track pair.reservoirId) {
+          <mat-option [value]="pair.reservoirId"
+            >{{ pair.reservoirName }} · {{ pair.deviceSerialNumber }}</mat-option
+          >
+        }</mat-select
+      ><mat-error>Seleccione al menos un par disponible.</mat-error></mat-form-field
+    >
+    @if (pairs().length === 0) {
+      <p>No hay pares disponibles en este grupo.</p>
+    }
+    <button mat-flat-button type="submit" [disabled]="disabled() || pairs().length === 0">
+      Agregar asignaciones
+    </button>
+  </form>
+}

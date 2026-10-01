@@ -1,0 +1,105 @@
+<section class="page">
+  <a mat-button routerLink="/devices">Volver a dispositivos</a
+  ><hg-query-feedback
+    [loading]="state.loading()"
+    [error]="state.error()"
+    (retry)="load()"
+  /><hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  @if (state.data(); as data) {
+    <header class="page-header">
+      <div>
+        <h1>{{ data.device.alias || data.device.serialNumber }}</h1>
+        <p>{{ data.device.serialNumber }} · {{ data.device.deviceModel }}</p>
+      </div>
+      <a mat-flat-button [routerLink]="['/devices', id, 'configurations']">Ver configuraciones</a>
+    </header>
+    <div class="panel">
+      <dl>
+        <dt>Estado administrativo</dt>
+        <dd>{{ data.device.lifecycleStatus | configurationLabel }}</dd>
+        <dt>Disponibilidad</dt>
+        <dd>{{ data.device.availability | configurationLabel }}</dd>
+        <dt>Última comunicación</dt>
+        <dd>
+          {{
+            data.device.lastCommunicationAt
+              ? (data.device.lastCommunicationAt | date: 'dd/MM/yyyy HH:mm')
+              : 'Sin comunicación registrada'
+          }}
+        </dd>
+        <dt>Entorno</dt>
+        <dd>{{ data.device.operatingEnvironment | configurationLabel }}</dd>
+        <dt>Configuración</dt>
+        <dd>
+          {{ data.device.configurationStatus | configurationLabel }}
+          @if (data.device.currentConfigurationVersion !== null) {
+            · Versión {{ data.device.currentConfigurationVersion }}
+          }
+        </dd>
+        <dt>Capacidades</dt>
+        <dd>
+          @for (capability of data.device.capabilities; track capability) {
+            <span class="badge">{{ capability | configurationLabel }}</span>
+          } @empty {
+            Sin capacidades registradas
+          }
+        </dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h2>Reservorio y responsable</h2>
+      @if (data.device.reservoirId) {
+        <p>
+          <a [routerLink]="['/reservoirs', data.device.reservoirId]">{{ data.reservoirName }}</a>
+        </p>
+        @if (data.responsibleProfileId) {
+          <a mat-button [routerLink]="['/operator-profiles', data.responsibleProfileId]"
+            >Ver perfil responsable</a
+          >
+        } @else {
+          <p>Par disponible, sin responsable.</p>
+          <a mat-button routerLink="/operator-profiles/new">Asignar desde un perfil</a>
+        }
+        <button mat-stroked-button [disabled]="actions.submitting()" (click)="unlink()">
+          Retirar vinculación
+        </button>
+      } @else if (data.device.lifecycleStatus === 'ACTIVE_UNLINKED') {
+        <hg-query-feedback
+          [loading]="options.loading()"
+          [error]="options.error()"
+          (retry)="load()"
+        />
+        <form [formGroup]="form" (ngSubmit)="link()">
+          <mat-form-field appearance="outline"
+            ><mat-label>Reservorio activo sin dispositivo</mat-label
+            ><mat-select formControlName="reservoirId">
+              @for (reservoir of options.data()?.reservoirs ?? []; track reservoir.id) {
+                <mat-option [value]="reservoir.id">{{ reservoir.name }}</mat-option>
+              }</mat-select
+            ><mat-error>Seleccione un reservorio disponible.</mat-error></mat-form-field
+          >
+          <div class="actions">
+            <button
+              mat-flat-button
+              type="submit"
+              [disabled]="actions.submitting() || options.loading() || !options.data()"
+            >
+              Vincular reservorio
+            </button>
+          </div>
+        </form>
+        @if (options.data()?.reservoirs?.length === 0) {
+          <p>No hay reservorios disponibles.</p>
+          <a mat-button routerLink="/reservoirs/new">Registrar reservorio</a>
+        }
+      } @else {
+        <p>Dispositivo sin vincular e inactivo o en mantenimiento.</p>
+      }
+    </div>
+    @if (data.device.lifecycleStatus !== 'INACTIVE') {
+      <button mat-stroked-button [disabled]="actions.submitting()" (click)="disable()">
+        Desactivar dispositivo
+      </button>
+    }
+  }
+</section>

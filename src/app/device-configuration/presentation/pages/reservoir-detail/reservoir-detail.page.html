@@ -1,0 +1,57 @@
+<section class="page narrow">
+  <a mat-button routerLink="/reservoirs">Volver a reservorios</a
+  ><hg-query-feedback
+    [loading]="state.loading()"
+    [error]="state.error()"
+    (retry)="load()"
+  /><hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  @if (state.data(); as data) {
+    <header class="page-header">
+      <div>
+        <h1>{{ data.reservoir.name }}</h1>
+        <span class="badge">{{ data.reservoir.status | configurationLabel }}</span>
+      </div>
+      @if (data.reservoir.status === 'ACTIVE') {
+        <button mat-stroked-button [disabled]="actions.submitting()" (click)="disable()">
+          Desactivar reservorio
+        </button>
+      }
+    </header>
+    <div class="panel">
+      <dl>
+        <dt>Grupo</dt>
+        <dd>
+          <a [routerLink]="['/groups', data.reservoir.groupId]">{{ data.groupName }}</a>
+        </dd>
+        <dt>Código</dt>
+        <dd>{{ data.reservoir.code }}</dd>
+        <dt>Tipo</dt>
+        <dd>{{ data.reservoir.reservoirType | configurationLabel }}</dd>
+        <dt>Ubicación</dt>
+        <dd>{{ data.reservoir.location }}</dd>
+        <dt>Capacidad</dt>
+        <dd>
+          {{
+            data.reservoir.capacityLiters === null
+              ? 'Sin especificar'
+              : data.reservoir.capacityLiters + ' litros'
+          }}
+        </dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h2>Dispositivo vinculado</h2>
+      @if (data.device; as device) {
+        <p>
+          <a [routerLink]="['/devices', device.id]">{{ device.serialNumber }}</a> ·
+          {{ device.lifecycleStatus | configurationLabel }}
+        </p>
+      } @else {
+        <p>
+          Sin dispositivo vinculado. Complete la unidad operativa desde el detalle del dispositivo.
+        </p>
+        <a mat-flat-button routerLink="/devices">Ir a dispositivos</a>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,58 @@
+<section class="page">
+  <a mat-button [routerLink]="['/devices', id]">Volver al dispositivo</a>
+  <h1>Configuraciones y versiones</h1>
+  <p>
+    Consulta administrativa. El operario completa y publica las configuraciones desde la aplicación
+    móvil.
+  </p>
+  <hg-query-feedback [loading]="state.loading()" [error]="state.error()" (retry)="load()" />
+  @if (state.data(); as data) {
+    <div class="panel">
+      <h2>{{ data.device.alias || data.device.serialNumber }}</h2>
+      <span class="badge">{{ data.device.configurationStatus | configurationLabel }}</span>
+      <p>
+        Versión vigente: {{ data.device.currentConfigurationVersion ?? 'Sin versión publicada' }}
+      </p>
+    </div>
+    @for (version of data.versions; track version.id) {
+      <article class="panel">
+        <h2>
+          Versión {{ version.configurationVersion }} · {{ version.status | configurationLabel }}
+          @if (
+            version.status === 'PUBLISHED' &&
+            version.configurationVersion === data.device.currentConfigurationVersion
+          ) {
+            <span class="badge">Vigente</span>
+          }
+        </h2>
+        <dl>
+          <dt>Compatibilidad informada</dt>
+          <dd>{{ version.compatible ? 'Compatible' : 'Incompatible' }}</dd>
+          <dt>Rango de pH</dt>
+          <dd>{{ version.phMin }} – {{ version.phMax }}</dd>
+          <dt>Temperatura</dt>
+          <dd>{{ version.temperatureMin }} – {{ version.temperatureMax }} °C</dd>
+          <dt>Liberación</dt>
+          <dd>{{ version.releaseMode | configurationLabel }}</dd>
+          <dt>Creada</dt>
+          <dd>{{ version.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+          <dt>Publicada</dt>
+          <dd>
+            {{
+              version.publishedAt ? (version.publishedAt | date: 'dd/MM/yyyy HH:mm') : 'Borrador'
+            }}
+          </dd>
+        </dl>
+        @if (version.incompatibilityReasons.length) {
+          <ul>
+            @for (reason of version.incompatibilityReasons; track reason) {
+              <li>{{ reason }}</li>
+            }
+          </ul>
+        }
+      </article>
+    } @empty {
+      <p class="empty">Este dispositivo no tiene borradores ni versiones publicadas.</p>
+    }
+  }
+</section>

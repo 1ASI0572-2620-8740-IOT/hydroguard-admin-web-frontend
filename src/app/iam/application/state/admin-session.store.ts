@@ -27,6 +27,15 @@ export class AdminSessionStore {
 
   readonly adminIdentifier = computed(() => this._session()?.identifier ?? null);
 
+  hasValidSession(): boolean {
+    const session = this._session();
+    return Boolean(
+      session?.token &&
+      session.role === 'ADMINISTRATOR' &&
+      (!session.expiresAt || session.expiresAt.getTime() > Date.now()),
+    );
+  }
+
   private restoreSession(): SignInResponse | null {
     const session = this.sessionRepo.getSession();
     if (!session?.expiresAt) return session;

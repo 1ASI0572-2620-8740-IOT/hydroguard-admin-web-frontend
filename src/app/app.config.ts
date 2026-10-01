@@ -1,6 +1,19 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
+import {
+  Router,
+  provideRouter,
+  withComponentInputBinding,
+  withInMemoryScrolling,
+} from '@angular/router';
+import { provideDeviceConfiguration } from './device-configuration/configuration.providers';
+import { apiClient, AppHttpError } from './core/http/api-client';
+import { AdminSessionStore } from './iam/application/state/admin-session.store';
 
 import { routes } from './app.routes';
 import { IamRepository } from './iam/domain/ports/iam.repository';
@@ -19,5 +32,20 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     { provide: SessionRepository, useClass: SessionStorageRepository },
     { provide: IamRepository, useClass: IamAxiosRepository },
+    ...provideDeviceConfiguration(),
+    provideAppInitializer(() => {
+      const session = inject(AdminSessionStore);
+      const router = inject(Router);
+      apiClient.interceptors.response.use(
+        (response) => response,
+        (error: unknown) => {
+          if (error instanceof AppHttpError && error.statusCode === 401 && session.session()) {
+            session.clear();
+            void router.navigate(['/login']);
+          }
+          return Promise.reject(error);
+        },
+      );
+    }),
   ],
 };

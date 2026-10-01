@@ -19,12 +19,18 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [adminAuthGuard],
+    canActivateChild: [adminAuthGuard],
     loadComponent: () =>
       import('./core/layout/admin-layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent,
       ),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'users' },
+      {
+        path: '',
+        loadChildren: () =>
+          import('./device-configuration/presentation/routes').then((m) => m.CONFIGURATION_ROUTES),
+      },
       {
         path: '',
         loadChildren: () => import('./iam/presentation/routes').then((m) => m.IAM_ROUTES),

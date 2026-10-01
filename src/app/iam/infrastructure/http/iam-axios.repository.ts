@@ -47,8 +47,12 @@ export class IamAxiosRepository implements IamRepository {
     return mapSignInResponseDtoToDomain(response.data);
   }
 
-  async signOut(): Promise<void> {
-    await this.client.post('/v1/authentication/sign-out');
+  async signOut(sessionToken?: string): Promise<void> {
+    await this.client.post(
+      '/v1/authentication/sign-out',
+      undefined,
+      sessionToken ? { headers: { Authorization: `Bearer ${sessionToken}` } } : undefined,
+    );
   }
 
   async findOperators(filter: OperatorFilter = {}): Promise<OperatorPage> {

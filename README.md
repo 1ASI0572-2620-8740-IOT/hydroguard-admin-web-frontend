@@ -2,7 +2,9 @@
 
 Aplicación web multiempresa para la administración de identidades y accesos de HydroGuard. En el alcance actual permite registrar una empresa con su única cuenta administradora, autenticar al administrador, crear y desactivar cuentas de operarios, consultar sus vínculos operativos y gestionar códigos de primer acceso.
 
-La creación de grupos, reservorios, dispositivos y asignaciones pertenece al bounded context de configuración operativa y todavía no está implementada en esta aplicación.
+El bounded context de configuración operativa (BC-02) permite administrar grupos, reservorios, dispositivos, vinculaciones exclusivas y perfiles de Operario con asignaciones e historial. La creación de una cuenta continúa hacia su perfil y código de primer acceso. La web también consulta borradores, versiones publicadas y compatibilidad de configuraciones, sin editarlas.
+
+La [guía de pruebas de BC-02](docs/guia-pruebas-bc02.md) describe el recorrido completo, los resultados esperados y el motivo de cada verificación.
 
 ## Requisitos
 
@@ -46,7 +48,7 @@ El mock persiste los registros en `mock-api/db.json`; las contraseñas visibles 
 | Textil San Juan S.A.C.       | Textil      | `admin.textil@hydroguard.pe` | `adminpassword123` |
 | Hidroverde Pachacámac S.A.C. | Hidropónico | `admin.hidro@hydroguard.pe`  | `adminpassword123` |
 
-Cada cuenta solo puede consultar y modificar los operarios pertenecientes a su empresa.
+Cada cuenta administradora solo puede consultar y modificar los operarios y recursos operativos pertenecientes a su empresa.
 
 ## Comandos
 
@@ -54,11 +56,13 @@ Cada cuenta solo puede consultar y modificar los operarios pertenecientes a su e
 npm start          # Servidor de desarrollo
 npm run mock:api   # Backend mock basado en mock-api/db.json
 npm run build      # Compilación de producción
+npm run verify:bc02 # Verificación HTTP sobre una base temporal
 ```
 
 ## Estructura principal
 
 - `src/app/iam`: bounded context de Identity and Access Management.
+- `src/app/device-configuration`: bounded context de configuración operativa, separado por capas.
 - `src/app/core`: infraestructura y layout compartidos por la aplicación.
 - `src/app/shared`: componentes reutilizables.
 - `mock-api`: servidor y datos para desarrollo local.
@@ -68,6 +72,7 @@ npm run build      # Compilación de producción
 
 ```bash
 npm run build
+npm run verify:bc02
 ```
 
 La compilación se genera en `dist/`, directorio excluido del repositorio.

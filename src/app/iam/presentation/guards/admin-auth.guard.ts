@@ -11,9 +11,10 @@ export const adminAuthGuard: CanActivateFn = () => {
   const sessionStore = inject(AdminSessionStore);
   const router = inject(Router);
 
-  if (sessionStore.isAuthenticated()) {
+  if (sessionStore.hasValidSession()) {
     return true;
   }
 
+  sessionStore.clear();
   return router.createUrlTree(['/login']);
 };
