@@ -27,6 +27,14 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'users' },
       {
+        path: 'telemetry',
+        loadComponent: () =>
+          import(
+            './contexts/telemetry/presentation/pages/telemetry-overview/telemetry-overview.component'
+          ).then((m) => m.TelemetryOverviewComponent),
+        title: 'Monitoreo de Telemetría — HydroGuard Admin',
+      },
+      {
         path: '',
         loadChildren: () =>
           import('./device-configuration/presentation/routes').then((m) => m.CONFIGURATION_ROUTES),

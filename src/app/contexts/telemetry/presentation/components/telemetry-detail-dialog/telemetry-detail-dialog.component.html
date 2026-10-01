@@ -1,0 +1,173 @@
+<div class="dialog-container">
+  <!-- Cabecera del Diálogo -->
+  <header class="dialog-header">
+    <div class="header-left">
+      <div class="device-badge-icon" [class.lost]="!isOnline">
+        <mat-icon>{{ device.model.includes('Wokwi') ? 'memory' : 'router' }}</mat-icon>
+      </div>
+      <div class="header-info">
+        <div class="title-with-pill">
+          <h2 class="device-title">{{ device.id }}</h2>
+          <span class="badge" [class.badge-online]="isOnline" [class.badge-lost]="!isOnline">
+            <span class="status-dot" [class.dot-online]="isOnline" [class.dot-lost]="!isOnline"></span>
+            <span>{{ isOnline ? 'Online' : 'Monitoreo Perdido' }}</span>
+          </span>
+        </div>
+        <p class="device-subtitle">{{ device.model }}</p>
+      </div>
+    </div>
+    <button mat-icon-button (click)="onClose()" class="btn-close" aria-label="Cerrar modal">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <!-- Barra de Identidad Técnica -->
+  <section class="technical-strip">
+    <div class="strip-item">
+      <span class="strip-label">Dirección MAC</span>
+      <code class="strip-code">{{ macAddress }}</code>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+      <span class="strip-label">Firmware</span>
+      <span class="strip-val">{{ firmwareVersion }}</span>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+      <span class="strip-label">Último Heartbeat</span>
+      <span class="strip-val">{{ device.lastHeartbeat | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
+    </div>
+  </section>
+
+  <!-- Contenido Principal -->
+  <div class="dialog-body">
+    <!-- Diagnóstico de Heartbeat si hay falla -->
+    @if (!isOnline) {
+      <div class="alert-box alert-lost">
+        <mat-icon>warning_amber</mat-icon>
+        <div>
+          <strong>Monitoreo Perdido:</strong> Se superó el intervalo máximo tolerable de heartbeat (60 segundos). La telemetría no se considera confiable hasta que el hardware vuelva a reportar señal.
+        </div>
+      </div>
+    }
+
+    <!-- Métricas en Tiempo Real -->
+    <div class="metrics-grid">
+      <!-- Tarjeta pH -->
+      <div class="metric-card ph-card">
+        <div class="metric-card-header">
+          <span class="metric-name">Potencial de Hidrógeno (pH)</span>
+          <span class="pill-range">Rango: 6.5 - 8.5</span>
+        </div>
+        <div class="metric-value-row">
+          <span class="metric-big-value">{{ device.lastReading.ph | number: '1.2-2' }}</span>
+          <span class="metric-unit">pH</span>
+        </div>
+        <div class="metric-status">
+          <span class="status-indicator normal"></span>
+          <span>Nivel en solución adecuado</span>
+        </div>
+      </div>
+
+      <!-- Tarjeta Temperatura -->
+      <div class="metric-card temp-card">
+        <div class="metric-card-header">
+          <span class="metric-name">Temperatura de Agua</span>
+          <span class="pill-range">Objetivo: 20 - 26 °C</span>
+        </div>
+        <div class="metric-value-row">
+          <span class="metric-big-value">{{ device.lastReading.temperature | number: '1.1-1' }}</span>
+          <span class="metric-unit">°C</span>
+        </div>
+        <div class="metric-status">
+          <span class="status-indicator normal"></span>
+          <span>Estable para recirculación</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de Actuación Correctiva (BC-03 Inbound/Outbound) -->
+    <div class="actuation-panel">
+      <div class="actuation-header">
+        <div class="actuation-title-box">
+          <mat-icon class="actuation-icon">tune</mat-icon>
+          <div>
+            <h3 class="actuation-title">Actuación Correctiva (Válvula de Alivio)</h3>
+            <p class="actuation-subtitle">Comando directo hacia el relé/solenoide del ESP32</p>
+          </div>
+        </div>
+
+        <button
+          mat-flat-button
+          [class.btn-open]="!valveOpen()"
+          [class.btn-close-valve]="valveOpen()"
+          [disabled]="valveOperating() || !isOnline"
+          (click)="toggleValve()"
+          class="actuation-btn"
+        >
+          <mat-icon>{{ valveOpen() ? 'lock' : 'lock_open' }}</mat-icon>
+          <span>{{ valveOpen() ? 'Cerrar Válvula' : 'Abrir Válvula' }}</span>
+        </button>
+      </div>
+
+      <div class="valve-status-row">
+        <span class="valve-state-text">
+          Estado actual:
+          <strong [class.text-open]="valveOpen()" [class.text-closed]="!valveOpen()">
+            {{ valveOpen() ? 'ABIERTA' : 'CERRADA' }}
+          </strong>
+        </span>
+        @if (actionFeedback()) {
+          <span class="action-feedback">{{ actionFeedback() }}</span>
+        }
+      </div>
+
+      @if (valveOperating()) {
+        <mat-progress-bar mode="indeterminate" class="actuation-loader"></mat-progress-bar>
+      }
+    </div>
+
+    <!-- Historial de Telemetría Reciente -->
+    <div class="history-section">
+      <h3 class="history-title">
+        <mat-icon>history</mat-icon>
+        <span>Lecturas Recientes de Telemetría (Validación de trama)</span>
+      </h3>
+
+      <div class="history-table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Marca de Tiempo</th>
+              <th>Lectura pH</th>
+              <th>Temperatura</th>
+              <th>Validación</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (reading of historyReadings; track reading.timestamp) {
+              <tr>
+                <td>{{ reading.timestamp | date: 'HH:mm:ss' }}</td>
+                <td><strong>{{ reading.ph }}</strong> pH</td>
+                <td><strong>{{ reading.temperature }}</strong> °C</td>
+                <td>
+                  <span class="validation-badge">
+                    <mat-icon>check_circle</mat-icon>
+                    <span>{{ reading.status }}</span>
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie del Diálogo -->
+  <footer class="dialog-footer">
+    <button mat-stroked-button (click)="onClose()" class="btn-cancel">
+      <span>Cerrar</span>
+    </button>
+  </footer>
+</div>
