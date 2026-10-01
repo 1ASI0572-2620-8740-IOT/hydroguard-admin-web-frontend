@@ -1,0 +1,62 @@
+<section class="page narrow">
+  <a mat-button routerLink="/reservoirs">Volver a reservorios</a>
+  <h1>Registrar reservorio</h1>
+  <hg-query-feedback
+    [loading]="state.loading()"
+    [error]="state.error()"
+    (retry)="load()"
+  /><hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  @if (state.data()?.groups?.length === 0) {
+    <p>Cree un grupo activo antes de registrar reservorios.</p>
+    <a mat-button routerLink="/groups/new">Crear grupo</a>
+  }
+  <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline"
+      ><mat-label>Grupo</mat-label
+      ><mat-select formControlName="groupId">
+        @for (group of state.data()?.groups ?? []; track group.id) {
+          <mat-option [value]="group.id">{{ group.name }}</mat-option>
+        }</mat-select
+      ><mat-error><hg-field-error [control]="form.controls.groupId" /></mat-error
+    ></mat-form-field>
+    <mat-form-field appearance="outline"
+      ><mat-label>Nombre</mat-label
+      ><input matInput formControlName="name" maxlength="120" /><mat-error
+        ><hg-field-error [control]="form.controls.name" /></mat-error></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Código interno</mat-label
+      ><input matInput formControlName="code" maxlength="40" /><mat-error
+        ><hg-field-error [control]="form.controls.code" /></mat-error
+    ></mat-form-field>
+    <mat-form-field appearance="outline"
+      ><mat-label>Tipo</mat-label
+      ><mat-select formControlName="reservoirType"
+        ><mat-option value="SUMP">Fosa</mat-option><mat-option value="TANK">Tanque</mat-option
+        ><mat-option value="RESERVOIR">Reservorio</mat-option></mat-select
+      ></mat-form-field
+    >
+    <mat-form-field appearance="outline"
+      ><mat-label>Ubicación</mat-label
+      ><input matInput formControlName="location" maxlength="250" /><mat-error
+        ><hg-field-error [control]="form.controls.location" /></mat-error></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Capacidad en litros (opcional)</mat-label
+      ><input
+        matInput
+        formControlName="capacityLiters"
+        type="number"
+        min="0"
+        step="any" /><mat-error
+        ><hg-field-error [control]="form.controls.capacityLiters" /></mat-error
+    ></mat-form-field>
+    <div class="actions">
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="actions.submitting() || !state.data() || !state.data()?.groups?.length"
+      >
+        {{ actions.submitting() ? 'Guardando…' : 'Registrar reservorio' }}</button
+      ><a mat-button routerLink="/reservoirs">Cancelar</a>
+    </div>
+  </form>
+</section>

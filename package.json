@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "mock:api": "node mock-api/server.mjs",
+    "verify:bc02": "node scripts/verify-bc02.mjs",
     "build": "ng build",
     "watch": "ng build --watch --configuration development"
   },

@@ -1,0 +1,39 @@
+<section class="page narrow">
+  <a mat-button routerLink="/groups">Volver a grupos</a>
+  <h1>Crear grupo de trabajo</h1>
+  <hg-query-feedback [loading]="state.loading()" [error]="state.error()" (retry)="load()" />
+  <hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  @if (state.data(); as organization) {
+    <p>
+      {{ organization.name }} ·
+      <span class="badge">{{ organization.segment | configurationLabel }}</span>
+    </p>
+    <p>El segmento se hereda de la empresa.</p>
+  }
+  <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline"
+      ><mat-label>Nombre del grupo</mat-label
+      ><input matInput formControlName="name" maxlength="120" /><mat-error
+        ><hg-field-error [control]="form.controls.name" /></mat-error
+    ></mat-form-field>
+    <mat-form-field appearance="outline"
+      ><mat-label>Propósito</mat-label
+      ><textarea matInput formControlName="purpose" maxlength="500" rows="3"></textarea
+      ><mat-error><hg-field-error [control]="form.controls.purpose" /></mat-error
+    ></mat-form-field>
+    <mat-form-field appearance="outline"
+      ><mat-label>{{
+        state.data()?.segment === 'HYDROPONIC'
+          ? 'Cultivo o tipo de planta (opcional)'
+          : 'Proceso o área (opcional)'
+      }}</mat-label
+      ><input matInput formControlName="classification" maxlength="120" /><mat-error
+        ><hg-field-error [control]="form.controls.classification" /></mat-error
+    ></mat-form-field>
+    <div class="actions">
+      <button mat-flat-button type="submit" [disabled]="actions.submitting() || !state.data()">
+        {{ actions.submitting() ? 'Guardando…' : 'Crear grupo' }}</button
+      ><a mat-button routerLink="/groups">Cancelar</a>
+    </div>
+  </form>
+</section>

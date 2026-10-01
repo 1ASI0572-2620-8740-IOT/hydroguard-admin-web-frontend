@@ -27,7 +27,7 @@ export interface OperatorPage {
 export abstract class IamRepository {
   abstract registerOrganization(request: RegisterOrganizationRequest): Promise<void>;
   abstract signIn(request: SignInRequest): Promise<SignInResponse>;
-  abstract signOut(): Promise<void>;
+  abstract signOut(sessionToken?: string): Promise<void>;
   abstract findOperators(filter?: OperatorFilter): Promise<OperatorPage>;
   abstract getOperatorById(operatorId: string): Promise<OperatorAccount | null>;
   abstract createOperator(request: CreateOperatorRequest): Promise<OperatorAccount>;

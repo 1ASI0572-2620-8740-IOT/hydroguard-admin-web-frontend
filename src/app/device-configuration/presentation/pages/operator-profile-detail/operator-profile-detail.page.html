@@ -1,0 +1,46 @@
+<section class="page">
+  <a mat-button routerLink="/operator-profiles">Volver a perfiles</a
+  ><hg-query-feedback
+    [loading]="state.loading()"
+    [error]="state.error()"
+    (retry)="load()"
+  /><hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  @if (state.data(); as data) {
+    <header class="page-header">
+      <div>
+        <h1>{{ data.profile.displayName }}</h1>
+        <span class="badge">{{ data.profile.status | configurationLabel }}</span>
+      </div>
+      <div class="actions">
+        <a mat-button [routerLink]="['/users', data.profile.userId]">Ver cuenta</a
+        ><a mat-flat-button [routerLink]="['/users', data.profile.userId, 'first-access']"
+          >Código de primer acceso</a
+        >
+      </div>
+    </header>
+    <div class="panel">
+      <p>
+        Grupo único:
+        <a [routerLink]="['/groups', data.profile.groupId]">{{ data.profile.groupName }}</a>
+      </p>
+      <p>
+        Las nuevas asignaciones deben pertenecer a este mismo grupo. La reasignación a otro operario
+        se hace cerrando la asignación y agregándola manualmente a su perfil.
+      </p>
+    </div>
+    <hg-query-feedback [loading]="pairs.loading()" [error]="pairs.error()" (retry)="load()" />
+    <hg-assignment-manager
+      [assignments]="data.assignments"
+      [pairs]="pairs.data() ?? []"
+      [active]="data.profile.status !== 'INACTIVE'"
+      [disabled]="actions.submitting() || pairs.loading() || state.loading() || !!pairs.error()"
+      (add)="addPairs($event)"
+      (close)="closePair($event)"
+    />
+    @if (data.profile.status !== 'INACTIVE') {
+      <button mat-stroked-button [disabled]="actions.submitting()" (click)="disable()">
+        Desactivar perfil
+      </button>
+    }
+  }
+</section>

@@ -1,0 +1,44 @@
+<section class="page narrow">
+  <a mat-button routerLink="/devices">Volver a dispositivos</a>
+  <h1>Registrar dispositivo</h1>
+  <p>
+    El alta activa el dispositivo sin vincularlo. La disponibilidad se obtiene de su comunicación.
+  </p>
+  <hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline"
+      ><mat-label>Número de serie</mat-label
+      ><input matInput formControlName="serialNumber" maxlength="80" /><mat-error
+        ><hg-field-error [control]="form.controls.serialNumber" /></mat-error></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Alias</mat-label
+      ><input matInput formControlName="alias" maxlength="120" /><mat-error
+        ><hg-field-error [control]="form.controls.alias" /></mat-error></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Modelo</mat-label
+      ><input matInput formControlName="deviceModel" maxlength="80" /><mat-error
+        ><hg-field-error [control]="form.controls.deviceModel" /></mat-error
+    ></mat-form-field>
+    <mat-form-field appearance="outline"
+      ><mat-label>Entorno</mat-label
+      ><mat-select formControlName="operatingEnvironment"
+        ><mat-option value="INTEGRAL_PRODUCT">Producto integral</mat-option
+        ><mat-option value="SIMULATION">Simulación</mat-option
+        ><mat-option value="ACADEMIC_PROTOTYPE">Prototipo académico</mat-option></mat-select
+      ></mat-form-field
+    >
+    <mat-form-field appearance="outline"
+      ><mat-label>Capacidades</mat-label
+      ><mat-select formControlName="capabilities" multiple>
+        @for (capability of capabilities; track capability) {
+          <mat-option [value]="capability">{{ capability | configurationLabel }}</mat-option>
+        }</mat-select
+      ><mat-error><hg-field-error [control]="form.controls.capabilities" /></mat-error
+    ></mat-form-field>
+    <div class="actions">
+      <button mat-flat-button type="submit" [disabled]="actions.submitting()">
+        {{ actions.submitting() ? 'Guardando…' : 'Registrar dispositivo' }}</button
+      ><a mat-button routerLink="/devices">Cancelar</a>
+    </div>
+  </form>
+</section>

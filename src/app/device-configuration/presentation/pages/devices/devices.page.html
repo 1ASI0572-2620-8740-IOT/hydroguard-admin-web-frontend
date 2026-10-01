@@ -1,0 +1,117 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Dispositivos</h1>
+      <p>
+        Registre dispositivos, vincule reservorios y consulte su disponibilidad y configuración.
+      </p>
+    </div>
+    <a mat-flat-button routerLink="/devices/new">Registrar dispositivo</a>
+  </header>
+  <hg-query-feedback [loading]="state.loading()" [error]="state.error()" (retry)="reload()" />
+  <hg-list-controls
+    [query]="query"
+    [total]="state.data()?.total ?? 0"
+    [loading]="state.loading()"
+    [statuses]="statuses"
+    (changed)="change($event)"
+  />
+  <form [formGroup]="filters" class="grid" (submit)="$event.preventDefault()">
+    <mat-form-field appearance="outline"
+      ><mat-label>Disponibilidad</mat-label
+      ><mat-select formControlName="availability" (selectionChange)="filter()"
+        ><mat-option value="">Todos</mat-option
+        ><mat-option value="ONLINE">{{ 'ONLINE' | configurationLabel }}</mat-option
+        ><mat-option value="DELAYED">{{ 'DELAYED' | configurationLabel }}</mat-option
+        ><mat-option value="OFFLINE">{{ 'OFFLINE' | configurationLabel }}</mat-option
+        ><mat-option value="UNKNOWN">{{ 'UNKNOWN' | configurationLabel }}</mat-option></mat-select
+      ></mat-form-field
+    >
+    <mat-form-field appearance="outline"
+      ><mat-label>Entorno</mat-label
+      ><mat-select formControlName="operatingEnvironment" (selectionChange)="filter()"
+        ><mat-option value="">Todos</mat-option
+        ><mat-option value="INTEGRAL_PRODUCT">{{
+          'INTEGRAL_PRODUCT' | configurationLabel
+        }}</mat-option
+        ><mat-option value="SIMULATION">{{ 'SIMULATION' | configurationLabel }}</mat-option
+        ><mat-option value="ACADEMIC_PROTOTYPE">{{
+          'ACADEMIC_PROTOTYPE' | configurationLabel
+        }}</mat-option></mat-select
+      ></mat-form-field
+    >
+    <mat-form-field appearance="outline"
+      ><mat-label>Configuración</mat-label
+      ><mat-select formControlName="configurationStatus" (selectionChange)="filter()"
+        ><mat-option value="">Todos</mat-option
+        ><mat-option value="MISSING">{{ 'MISSING' | configurationLabel }}</mat-option
+        ><mat-option value="COMPATIBLE">{{ 'COMPATIBLE' | configurationLabel }}</mat-option
+        ><mat-option value="INCOMPATIBLE">{{
+          'INCOMPATIBLE' | configurationLabel
+        }}</mat-option></mat-select
+      ></mat-form-field
+    >
+  </form>
+  @if (state.data(); as result) {
+    <div class="table-scroll">
+      <table
+        mat-table
+        [dataSource]="result.items"
+        matSort
+        [matSortActive]="query.sortBy ?? 'serialNumber'"
+        [matSortDirection]="query.sortDirection ?? 'asc'"
+        (matSortChange)="sort($event)"
+      >
+        <ng-container matColumnDef="serialNumber"
+          ><th mat-header-cell *matHeaderCellDef mat-sort-header="serialNumber">Serie</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/devices', item.id]">{{ item.serialNumber }}</a>
+          </td></ng-container
+        >
+        <ng-container matColumnDef="alias"
+          ><th mat-header-cell *matHeaderCellDef mat-sort-header="alias">Alias</th>
+          <td mat-cell *matCellDef="let item">{{ item.alias || 'Sin alias' }}</td></ng-container
+        >
+        <ng-container matColumnDef="lifecycleStatus"
+          ><th mat-header-cell *matHeaderCellDef>Vinculación y responsable</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.lifecycleStatus | configurationLabel }}
+          </td></ng-container
+        >
+        <ng-container matColumnDef="reservoirId"
+          ><th mat-header-cell *matHeaderCellDef>Reservorio</th>
+          <td mat-cell *matCellDef="let item">
+            @if (item.reservoirId) {
+              <a [routerLink]="['/reservoirs', item.reservoirId]">Ver reservorio</a>
+            } @else {
+              Sin vincular
+            }
+          </td></ng-container
+        >
+        <ng-container matColumnDef="availability"
+          ><th mat-header-cell *matHeaderCellDef>Disponibilidad</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.availability | configurationLabel }}
+          </td></ng-container
+        >
+        <ng-container matColumnDef="operatingEnvironment"
+          ><th mat-header-cell *matHeaderCellDef>Entorno</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.operatingEnvironment | configurationLabel }}
+          </td></ng-container
+        >
+        <ng-container matColumnDef="configurationStatus"
+          ><th mat-header-cell *matHeaderCellDef>Configuración</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.configurationStatus | configurationLabel }}
+          </td></ng-container
+        >
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </div>
+    @if (result.items.length === 0) {
+      <p class="empty" role="status">No hay resultados para los filtros actuales.</p>
+    }
+  }
+</section>

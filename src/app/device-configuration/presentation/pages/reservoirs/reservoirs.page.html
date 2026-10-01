@@ -1,0 +1,62 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Reservorios</h1>
+      <p>Cada reservorio pertenece a un grupo y puede vincularse con un dispositivo.</p>
+    </div>
+    <a mat-flat-button routerLink="/reservoirs/new">Registrar reservorio</a>
+  </header>
+  <hg-query-feedback [loading]="state.loading()" [error]="state.error()" (retry)="reload()" />
+  <hg-list-controls
+    [query]="query"
+    [total]="state.data()?.total ?? 0"
+    [loading]="state.loading()"
+    [statuses]="statuses"
+    (changed)="change($event)"
+  />
+
+  @if (state.data(); as result) {
+    <div class="table-scroll">
+      <table
+        mat-table
+        [dataSource]="result.items"
+        matSort
+        [matSortActive]="query.sortBy ?? 'name'"
+        [matSortDirection]="query.sortDirection ?? 'asc'"
+        (matSortChange)="sort($event)"
+      >
+        <ng-container matColumnDef="name"
+          ><th mat-header-cell *matHeaderCellDef mat-sort-header="name">Nombre</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/reservoirs', item.id]">{{ item.name }}</a>
+          </td></ng-container
+        >
+        <ng-container matColumnDef="code"
+          ><th mat-header-cell *matHeaderCellDef mat-sort-header="code">Código</th>
+          <td mat-cell *matCellDef="let item">{{ item.code }}</td></ng-container
+        >
+        <ng-container matColumnDef="location"
+          ><th mat-header-cell *matHeaderCellDef mat-sort-header="location">Ubicación</th>
+          <td mat-cell *matCellDef="let item">{{ item.location }}</td></ng-container
+        >
+        <ng-container matColumnDef="reservoirType"
+          ><th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.reservoirType | configurationLabel }}
+          </td></ng-container
+        >
+        <ng-container matColumnDef="status"
+          ><th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.status | configurationLabel }}
+          </td></ng-container
+        >
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </div>
+    @if (result.items.length === 0) {
+      <p class="empty" role="status">No hay resultados para los filtros actuales.</p>
+    }
+  }
+</section>

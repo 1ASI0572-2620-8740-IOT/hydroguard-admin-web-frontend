@@ -1,0 +1,59 @@
+<section class="page narrow">
+  <a mat-button routerLink="/operator-profiles">Volver a perfiles</a>
+  <h1>Crear perfil de operario</h1>
+  <p>Cuenta → Perfil, grupo y asignaciones → Código de primer acceso</p>
+  <hg-query-feedback
+    [loading]="state.loading()"
+    [error]="state.error()"
+    (retry)="load()"
+  /><hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  @if (state.data()?.operators?.length === 0) {
+    <p>No hay cuentas activas sin perfil. Cree primero una cuenta.</p>
+    <a mat-button routerLink="/users/new">Crear cuenta de operario</a>
+  }
+  <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline"
+      ><mat-label>Cuenta del operario</mat-label
+      ><mat-select formControlName="userId">
+        @for (operator of state.data()?.operators ?? []; track operator.id) {
+          <mat-option [value]="operator.id">{{ operator.name }}</mat-option>
+        }</mat-select
+      ><mat-error><hg-field-error [control]="form.controls.userId" /></mat-error
+    ></mat-form-field>
+    <mat-form-field appearance="outline"
+      ><mat-label>Grupo único</mat-label
+      ><mat-select formControlName="groupId">
+        @for (group of state.data()?.groups ?? []; track group.id) {
+          <mat-option [value]="group.id">{{ group.name }}</mat-option>
+        }</mat-select
+      ><mat-error><hg-field-error [control]="form.controls.groupId" /></mat-error
+    ></mat-form-field>
+    <hg-query-feedback [loading]="pairs.loading()" [error]="pairs.error()" (retry)="loadPairs()" />
+    @if (pairs.data()?.length === 0) {
+      <p>
+        No hay pares activos disponibles en este grupo. Registre y vincule un dispositivo a un
+        reservorio.
+      </p>
+      <a mat-button routerLink="/devices">Ir a dispositivos</a>
+    }
+    <mat-form-field appearance="outline"
+      ><mat-label>Reservorios y dispositivos disponibles</mat-label
+      ><mat-select formControlName="reservoirIds" multiple [disabled]="pairs.loading()">
+        @for (pair of pairs.data() ?? []; track pair.reservoirId) {
+          <mat-option [value]="pair.reservoirId"
+            >{{ pair.reservoirName }} · {{ pair.deviceSerialNumber }}</mat-option
+          >
+        }</mat-select
+      ><mat-error><hg-field-error [control]="form.controls.reservoirIds" /></mat-error
+    ></mat-form-field>
+    <div class="actions">
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="actions.submitting() || !state.data() || pairs.loading()"
+      >
+        {{ actions.submitting() ? 'Guardando…' : 'Crear perfil y asignaciones' }}</button
+      ><a mat-button routerLink="/operator-profiles">Cancelar</a>
+    </div>
+  </form>
+</section>

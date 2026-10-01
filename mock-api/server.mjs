@@ -1,10 +1,12 @@
 import { createServer } from 'node:http';
 import { randomBytes, randomUUID } from 'node:crypto';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, rename } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { handleConfiguration, isConfigurationPath } from './configuration/routes.mjs';
+import { closeAssignment, hasProcess } from './configuration/helpers.mjs';
 
 const PORT = Number(process.env.PORT || 3000);
-const DB_PATH = fileURLToPath(new URL('./db.json', import.meta.url));
+const DB_PATH = process.env.MOCK_DB_PATH || fileURLToPath(new URL('./db.json', import.meta.url));
 const sessions = new Map();
 
 const send = (res, status, body) => {
@@ -18,7 +20,10 @@ const send = (res, status, body) => {
 };
 
 const readDb = async () => JSON.parse(await readFile(DB_PATH, 'utf8'));
-const saveDb = async (db) => writeFile(DB_PATH, JSON.stringify(db, null, 2) + '\n', 'utf8');
+const saveDb = async (db) => {
+  await writeFile(DB_PATH + '.tmp', JSON.stringify(db, null, 2) + '\n', 'utf8');
+  await rename(DB_PATH + '.tmp', DB_PATH);
+};
 
 const readBody = async (req) => {
   const chunks = [];
@@ -115,7 +120,7 @@ const latestCode = (db, operatorId, organizationId, profileId) =>
     )
     .sort((left, right) => Date.parse(right.generatedAt) - Date.parse(left.generatedAt))[0];
 
-const server = createServer(async (req, res) => {
+const handleRequest = async (req, res) => {
   if (req.method === 'OPTIONS') return send(res, 204);
 
   try {
@@ -124,9 +129,9 @@ const server = createServer(async (req, res) => {
 
     if (req.method === 'GET' && (path === '/' || path === '/api/v1/health')) {
       return send(res, 200, {
-        name: 'HydroGuard IAM Mock API',
+        name: 'HydroGuard Admin Mock API',
         status: 'UP',
-        baseUrl: `http://127.0.0.1:${PORT}/api/v1`,
+        baseUrl: `http://127.0.0.1:${server.address().port}/api/v1`,
         frontendUrl: 'http://127.0.0.1:4200',
         message: 'El mock está activo. La interfaz web se ejecuta en el puerto 4200.',
       });
@@ -253,6 +258,10 @@ const server = createServer(async (req, res) => {
     }
 
     const authentication = requireAuthentication(req);
+    if (!db.users.some((user) => user.id === authentication.userId && user.status === 'ACTIVE')) {
+      sessions.delete(authentication.token);
+      return send(res, 401, { message: 'La cuenta de la sesión ya no está activa.' });
+    }
 
     if (req.method === 'POST' && path === '/api/v1/authentication/sign-out') {
       sessions.delete(authentication.token);
@@ -260,6 +269,13 @@ const server = createServer(async (req, res) => {
     }
 
     const { organizationId } = requireAdministrator(authentication);
+
+    if (isConfigurationPath(path)) {
+      const body = ['POST', 'PATCH'].includes(req.method) ? await readBody(req) : {};
+      const result = handleConfiguration({ method: req.method, url, body, db, organizationId });
+      if (result.changed) await saveDb(db);
+      return send(res, result.status, result.body);
+    }
 
     if (req.method === 'GET' && path === '/api/v1/operators') {
       const searchTerm = (url.searchParams.get('searchTerm') || '').trim().toLowerCase();
@@ -340,12 +356,30 @@ const server = createServer(async (req, res) => {
       if (body.status !== 'INACTIVE') {
         return send(res, 422, { message: 'El único cambio admitido es la baja lógica.' });
       }
+      const assignments = db.deviceAssignments.filter(
+        (item) =>
+          item.organizationId === organizationId &&
+          item.status === 'ACTIVE' &&
+          db.operatorProfiles.some(
+            (profile) => profile.id === item.operatorProfileId && profile.userId === operator.id,
+          ),
+      );
+      if (assignments.some((item) => hasProcess(db, item.deviceId))) {
+        return send(res, 409, { message: 'El operario tiene un proceso activo.' });
+      }
       operator.status = 'INACTIVE';
       operator.updatedAt = new Date().toISOString();
       const profile = db.operatorProfiles.find(
         (item) => item.userId === operator.id && item.organizationId === organizationId,
       );
       if (profile) profile.status = 'INACTIVE';
+      for (const assignment of assignments) closeAssignment(db, assignment);
+      for (const code of db.firstAccessCodes.filter(
+        (item) => item.operatorAccountId === operator.id && item.status === 'ACTIVE',
+      )) {
+        code.status = 'REVOKED';
+        code.revokedAt = new Date().toISOString();
+      }
       await saveDb(db);
       return send(res, 204);
     }
@@ -390,7 +424,19 @@ const server = createServer(async (req, res) => {
         summary.operatorProfileId !== body.operatorProfileId ||
         summary.profileStatus !== 'PENDING_FIRST_ACCESS' ||
         !summary.groupId ||
-        !summary.assignments.some((item) => item.status === 'ACTIVE')
+        !summary.assignments.some(
+          (item) =>
+            item.status === 'ACTIVE' &&
+            db.reservoirs.some(
+              (reservoir) => reservoir.id === item.reservoirId && reservoir.status !== 'INACTIVE',
+            ) &&
+            db.devices.some(
+              (device) =>
+                device.id === item.deviceId &&
+                device.reservoirId === item.reservoirId &&
+                device.lifecycleStatus === 'ACTIVE_ASSIGNED',
+            ),
+        )
       ) {
         return send(res, 409, { message: 'No se cumplen las precondiciones de primer acceso.' });
       }
@@ -434,10 +480,24 @@ const server = createServer(async (req, res) => {
     const status = Number(error.status || 500);
     return send(res, status, {
       message: status === 500 ? 'Error interno del servidor mock.' : error.message,
+      ...(error.errors ? { errors: error.errors } : {}),
     });
   }
+};
+
+// Serializa lectura-validación-escritura para evitar dobles responsables y pérdida de datos.
+let requestQueue = Promise.resolve();
+const server = createServer((req, res) => {
+  if (req.method === 'OPTIONS') return send(res, 204);
+  requestQueue = requestQueue
+    .then(() => handleRequest(req, res))
+    .catch(() => {
+      if (!res.writableEnded) send(res, 500, { message: 'Error interno del servidor mock.' });
+    });
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log('HydroGuard IAM mock disponible en http://127.0.0.1:' + PORT + '/api/v1');
+  console.log(
+    'HydroGuard Admin mock disponible en http://127.0.0.1:' + server.address().port + '/api/v1',
+  );
 });

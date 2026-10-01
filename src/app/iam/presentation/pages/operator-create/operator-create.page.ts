@@ -66,7 +66,9 @@ export class OperatorCreatePage {
         new CreateOperatorRequest(displayName, identifier, password),
       );
 
-      await this.router.navigate(['/users', created.id]);
+      await this.router.navigate(['/operator-profiles/new'], {
+        queryParams: { userId: created.id },
+      });
     } catch (error: unknown) {
       this.errorMessage.set(
         getErrorMessage(

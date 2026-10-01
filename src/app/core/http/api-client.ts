@@ -26,7 +26,7 @@ export const createApiClient = (): AxiosInstance => {
     (config: InternalAxiosRequestConfig) => {
       try {
         const rawSession = sessionStorage.getItem('hg_admin_session');
-        if (rawSession) {
+        if (rawSession && !config.headers.Authorization) {
           const parsed: unknown = JSON.parse(rawSession);
           if (
             parsed &&
