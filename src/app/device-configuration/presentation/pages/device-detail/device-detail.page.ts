@@ -72,14 +72,17 @@ export class DeviceDetailPage implements OnInit {
     }
     const id = this.id;
     const reservoirId = this.form.controls.reservoirId.value;
-    await this.actions.run(
+    const linked = await this.actions.run(
       'Vincular dispositivo',
       () => this.linkDevice.execute(id, reservoirId),
       () => this.load(),
       'Se vinculará este dispositivo exclusivamente al reservorio seleccionado.',
       this.form,
     );
-    this.form.reset();
+    const reservoirRemainsAvailable = this.options
+      .data()
+      ?.reservoirs.some((reservoir) => reservoir.id === reservoirId);
+    if (linked || reservoirRemainsAvailable === false) this.form.reset();
   }
   unlink() {
     const id = this.id;
