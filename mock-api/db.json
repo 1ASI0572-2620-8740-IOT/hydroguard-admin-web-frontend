@@ -30,9 +30,7 @@
       "displayName": "Administrador Textil",
       "password": "adminpassword123",
       "role": "ROLE_ADMIN",
-      "roles": [
-        "ROLE_ADMIN"
-      ],
+      "roles": ["ROLE_ADMIN"],
       "status": "ACTIVE",
       "email": "admin.textil@hydroguard.pe",
       "createdAt": "2026-09-01T08:00:00.000Z",
@@ -46,9 +44,7 @@
       "displayName": "Administrador Hidropónico",
       "password": "adminpassword123",
       "role": "ROLE_ADMIN",
-      "roles": [
-        "ROLE_ADMIN"
-      ],
+      "roles": ["ROLE_ADMIN"],
       "status": "ACTIVE",
       "email": "admin.hidro@hydroguard.pe",
       "createdAt": "2026-09-02T08:00:00.000Z",
@@ -62,9 +58,7 @@
       "displayName": "Marcelino Valencia",
       "password": "operadorpassword123",
       "role": "ROLE_OPERATOR",
-      "roles": [
-        "ROLE_OPERATOR"
-      ],
+      "roles": ["ROLE_OPERATOR"],
       "status": "ACTIVE",
       "email": "mvalencia@textilperu.com",
       "createdAt": "2026-09-05T10:00:00.000Z",
@@ -78,9 +72,7 @@
       "displayName": "Lucía Paredes",
       "password": "operadorpassword123",
       "role": "ROLE_OPERATOR",
-      "roles": [
-        "ROLE_OPERATOR"
-      ],
+      "roles": ["ROLE_OPERATOR"],
       "status": "ACTIVE",
       "email": "lparedes@hidroverde.pe",
       "createdAt": "2026-09-10T14:30:00.000Z",
@@ -94,9 +86,7 @@
       "displayName": "Carlos Mendoza",
       "password": "operadorpassword123",
       "role": "ROLE_OPERATOR",
-      "roles": [
-        "ROLE_OPERATOR"
-      ],
+      "roles": ["ROLE_OPERATOR"],
       "status": "ACTIVE",
       "email": "cmendoza@agrohuerto.pe",
       "createdAt": "2026-09-15T09:15:00.000Z",
@@ -110,9 +100,7 @@
       "displayName": "Jorge Quispe (Baja)",
       "password": "operadorpassword123",
       "role": "ROLE_OPERATOR",
-      "roles": [
-        "ROLE_OPERATOR"
-      ],
+      "roles": ["ROLE_OPERATOR"],
       "status": "INACTIVE",
       "email": "jquispe@textilperu.com",
       "createdAt": "2026-08-20T11:00:00.000Z",
@@ -126,9 +114,7 @@
       "displayName": "Juan Perez Quispe",
       "password": "juanperez123",
       "role": "ROLE_OPERATOR",
-      "roles": [
-        "ROLE_OPERATOR"
-      ],
+      "roles": ["ROLE_OPERATOR"],
       "status": "ACTIVE",
       "createdAt": "2026-09-29T20:29:47.750Z",
       "updatedAt": "2026-09-29T20:29:47.750Z"
@@ -141,9 +127,7 @@
       "displayName": "Francisco Valencia",
       "password": "franciscovalencia123",
       "role": "ROLE_OPERATOR",
-      "roles": [
-        "ROLE_OPERATOR"
-      ],
+      "roles": ["ROLE_OPERATOR"],
       "status": "ACTIVE",
       "createdAt": "2026-09-30T04:55:38.334Z",
       "updatedAt": "2026-09-30T04:55:38.334Z"
@@ -446,7 +430,9 @@
       "configurationVersion": 1,
       "status": "PUBLISHED",
       "compatible": false,
-      "incompatibilityReasons": ["Escenario mock: la versión requiere calentamiento y el dispositivo no declara esa capacidad."],
+      "incompatibilityReasons": [
+        "Escenario mock: la versión requiere calentamiento y el dispositivo no declara esa capacidad."
+      ],
       "phMin": 5.5,
       "phMax": 6.5,
       "temperatureMin": 18,
@@ -456,11 +442,316 @@
       "publishedAt": "2026-09-10T16:15:00.000Z"
     }
   ],
-  "measurements": [],
-  "processes": [],
+  "measurements": [
+    {
+      "id": "msr-tx-01",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "ph": 7.2,
+      "temperature": 24.6,
+      "measuredAt": "2026-10-03T11:44:00.000Z"
+    },
+    {
+      "id": "msr-tx-02",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "ph": 9.1,
+      "temperature": 31.8,
+      "measuredAt": "2026-10-03T11:40:00.000Z"
+    },
+    {
+      "id": "msr-tx-03",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "ph": 8.9,
+      "temperature": 28.1,
+      "measuredAt": "2026-10-02T15:10:00.000Z"
+    },
+    {
+      "id": "msr-hp-01",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "ph": 6.1,
+      "temperature": 23.4,
+      "measuredAt": "2026-10-03T11:25:00.000Z"
+    },
+    {
+      "id": "msr-hp-02",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "ph": 5.2,
+      "temperature": 27.9,
+      "measuredAt": "2026-10-01T09:20:00.000Z"
+    }
+  ],
+  "processes": [
+    {
+      "id": "proc-tx-01",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "state": "READY",
+      "createdAt": "2026-10-02T15:10:00.000Z",
+      "updatedAt": "2026-10-03T11:44:00.000Z"
+    },
+    {
+      "id": "proc-tx-02",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "state": "CORRECTION",
+      "createdAt": "2026-10-03T11:40:00.000Z",
+      "updatedAt": "2026-10-03T11:42:00.000Z"
+    },
+    {
+      "id": "proc-hp-01",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "state": "WAITING",
+      "createdAt": "2026-10-03T10:40:00.000Z",
+      "updatedAt": "2026-10-03T11:25:00.000Z"
+    },
+    {
+      "id": "proc-hp-02",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "state": "FAILURE",
+      "createdAt": "2026-10-01T09:20:00.000Z",
+      "updatedAt": "2026-10-01T10:05:00.000Z"
+    }
+  ],
   "actuations": [],
-  "alerts": [],
-  "incidents": [],
-  "traceabilityEntries": [],
+  "alerts": [
+    {
+      "id": "alt-tx-01",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "severity": "HIGH",
+      "description": "pH 9.1 fuera del rango configurado (6.5–8.5).",
+      "source": "Evaluación de calidad",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-03T11:40:10.000Z",
+      "updatedAt": "2026-10-03T11:40:10.000Z"
+    },
+    {
+      "id": "alt-tx-02",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "severity": "MEDIUM",
+      "description": "La temperatura superó temporalmente el umbral operativo.",
+      "source": "Evaluación de calidad",
+      "status": "ACKNOWLEDGED",
+      "createdAt": "2026-10-02T15:10:10.000Z",
+      "updatedAt": "2026-10-02T15:18:00.000Z",
+      "attendedAt": "2026-10-02T15:18:00.000Z"
+    },
+    {
+      "id": "alt-hp-01",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "severity": "MEDIUM",
+      "description": "Comunicación retrasada; verifique la conectividad del dispositivo.",
+      "source": "Disponibilidad IoT",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-03T11:30:00.000Z",
+      "updatedAt": "2026-10-03T11:30:00.000Z"
+    },
+    {
+      "id": "alt-hp-02",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "severity": "CRITICAL",
+      "description": "Monitoreo perdido y proceso bloqueado con la válvula cerrada.",
+      "source": "Disponibilidad IoT",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-01T10:05:00.000Z",
+      "updatedAt": "2026-10-01T10:05:00.000Z"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc-tx-01",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "incidentType": "QUALITY_INCIDENT",
+      "description": "Desviación de pH corregida mediante intervención manual y reevaluación.",
+      "status": "CLOSED",
+      "correlationId": "corr-tx-01",
+      "createdAt": "2026-10-02T15:10:10.000Z",
+      "updatedAt": "2026-10-02T15:42:00.000Z",
+      "closedAt": "2026-10-02T15:42:00.000Z"
+    },
+    {
+      "id": "inc-hp-01",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "incidentType": "MONITORING_LOSS",
+      "description": "El dispositivo dejó de transmitir mediciones durante el intervalo esperado.",
+      "status": "OPEN",
+      "correlationId": "corr-hp-02",
+      "createdAt": "2026-10-01T10:05:00.000Z",
+      "updatedAt": "2026-10-01T10:05:00.000Z"
+    }
+  ],
+  "traceabilityEntries": [
+    {
+      "id": "evt-tx-01",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "correlationId": "corr-tx-01",
+      "cycleId": null,
+      "eventType": "MEASUREMENT_RECORDED",
+      "title": "Medición no conforme registrada",
+      "description": "Se registró pH 8.9 y temperatura 28.1 °C.",
+      "actor": "HydroGuard Edge",
+      "outcome": "WARNING",
+      "ph": 8.9,
+      "temperature": 28.1,
+      "occurredAt": "2026-10-02T15:10:00.000Z",
+      "createdAt": "2026-10-02T15:10:00.000Z"
+    },
+    {
+      "id": "evt-tx-02",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "correlationId": "corr-tx-01",
+      "cycleId": "cycle-tx-01",
+      "eventType": "CORRECTION_STARTED",
+      "title": "Corrección manual iniciada",
+      "description": "El operario confirmó la aplicación del corrector de pH.",
+      "actor": "Marcelino Valencia",
+      "outcome": "INFO",
+      "ph": 8.9,
+      "temperature": 28.1,
+      "occurredAt": "2026-10-02T15:16:00.000Z",
+      "createdAt": "2026-10-02T15:16:00.000Z"
+    },
+    {
+      "id": "evt-tx-03",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "correlationId": "corr-tx-01",
+      "cycleId": "cycle-tx-01",
+      "eventType": "MEASUREMENT_RECORDED",
+      "title": "Reevaluación conforme",
+      "description": "La nueva medición confirmó el retorno a los rangos permitidos.",
+      "actor": "HydroGuard Edge",
+      "outcome": "SUCCESS",
+      "ph": 7.2,
+      "temperature": 24.6,
+      "occurredAt": "2026-10-02T15:40:00.000Z",
+      "createdAt": "2026-10-02T15:40:00.000Z"
+    },
+    {
+      "id": "evt-tx-04",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "correlationId": "corr-tx-01",
+      "cycleId": "cycle-tx-01",
+      "eventType": "RELEASE_AUTHORIZED",
+      "title": "Liberación autorizada",
+      "description": "El administrador confirmó la liberación manual después de la reevaluación conforme.",
+      "actor": "Administrador Textil",
+      "outcome": "SUCCESS",
+      "ph": 7.2,
+      "temperature": 24.6,
+      "occurredAt": "2026-10-02T15:42:00.000Z",
+      "createdAt": "2026-10-02T15:42:00.000Z"
+    },
+    {
+      "id": "evt-tx-05",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "correlationId": "corr-tx-02",
+      "cycleId": null,
+      "eventType": "MEASUREMENT_RECORDED",
+      "title": "Parámetros fuera de rango",
+      "description": "Se detectó pH elevado y temperatura superior al máximo configurado.",
+      "actor": "HydroGuard Edge",
+      "outcome": "WARNING",
+      "ph": 9.1,
+      "temperature": 31.8,
+      "occurredAt": "2026-10-03T11:40:00.000Z",
+      "createdAt": "2026-10-03T11:40:00.000Z"
+    },
+    {
+      "id": "evt-tx-06",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "correlationId": "corr-tx-02",
+      "cycleId": null,
+      "eventType": "ALERT_CREATED",
+      "title": "Alerta de calidad generada",
+      "description": "Se notificó al operario responsable para iniciar una corrección.",
+      "actor": "Monitoring Service",
+      "outcome": "WARNING",
+      "ph": 9.1,
+      "temperature": 31.8,
+      "occurredAt": "2026-10-03T11:40:10.000Z",
+      "createdAt": "2026-10-03T11:40:10.000Z"
+    },
+    {
+      "id": "evt-hp-01",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "correlationId": "corr-hp-01",
+      "cycleId": "cycle-hp-01",
+      "eventType": "MEASUREMENT_RECORDED",
+      "title": "Medición recibida con retraso",
+      "description": "La medición se recibió fuera del intervalo esperado, pero conserva valores conformes.",
+      "actor": "HydroGuard Edge",
+      "outcome": "WARNING",
+      "ph": 6.1,
+      "temperature": 23.4,
+      "occurredAt": "2026-10-03T11:25:00.000Z",
+      "createdAt": "2026-10-03T11:25:00.000Z"
+    },
+    {
+      "id": "evt-hp-02",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "correlationId": "corr-hp-01",
+      "cycleId": "cycle-hp-01",
+      "eventType": "ALERT_CREATED",
+      "title": "Comunicación retrasada",
+      "description": "Se generó una alerta preventiva de disponibilidad.",
+      "actor": "Monitoring Service",
+      "outcome": "WARNING",
+      "ph": 6.1,
+      "temperature": 23.4,
+      "occurredAt": "2026-10-03T11:30:00.000Z",
+      "createdAt": "2026-10-03T11:30:00.000Z"
+    },
+    {
+      "id": "evt-hp-03",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "correlationId": "corr-hp-02",
+      "cycleId": null,
+      "eventType": "MONITORING_LOST",
+      "title": "Monitoreo perdido",
+      "description": "No se recibieron nuevas mediciones dentro del intervalo configurado.",
+      "actor": "Telemetry Service",
+      "outcome": "FAILURE",
+      "ph": 5.2,
+      "temperature": 27.9,
+      "occurredAt": "2026-10-01T10:05:00.000Z",
+      "createdAt": "2026-10-01T10:05:00.000Z"
+    },
+    {
+      "id": "evt-hp-04",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "correlationId": "corr-hp-02",
+      "cycleId": null,
+      "eventType": "INCIDENT_REGISTERED",
+      "title": "Incidente de disponibilidad registrado",
+      "description": "El proceso fue bloqueado y la válvula se mantuvo cerrada.",
+      "actor": "Monitoring Service",
+      "outcome": "FAILURE",
+      "ph": null,
+      "temperature": null,
+      "occurredAt": "2026-10-01T10:05:10.000Z",
+      "createdAt": "2026-10-01T10:05:10.000Z"
+    }
+  ],
   "reports": []
 }
