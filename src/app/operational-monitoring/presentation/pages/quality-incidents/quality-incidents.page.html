@@ -1,0 +1,165 @@
+<section class="monitoring-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Monitoreo y trazabilidad</p>
+      <h1>Incidentes de calidad</h1>
+      <p>
+        Registre condiciones no conformes o pérdidas de monitoreo y conserve su vínculo con el
+        dispositivo y la evidencia temporal.
+      </p>
+    </div>
+  </header>
+  <article class="panel">
+    <header class="panel-header">
+      <h2>Registrar incidente</h2>
+      <span class="muted">Los campos son obligatorios</span>
+    </header>
+    <form class="form-grid" [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline"
+        ><mat-label>Dispositivo</mat-label
+        ><mat-select formControlName="deviceId">
+          @for (device of devices(); track device.deviceId) {
+            <mat-option [value]="device.deviceId"
+              >{{ device.serialNumber }} · {{ device.reservoirName }}</mat-option
+            >
+          }
+        </mat-select>
+        @if (form.controls.deviceId.touched && form.controls.deviceId.invalid) {
+          <mat-error>Seleccione un dispositivo.</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline"
+        ><mat-label>Tipo</mat-label
+        ><mat-select formControlName="incidentType"
+          ><mat-option value="QUALITY_INCIDENT">Incidente de calidad</mat-option
+          ><mat-option value="MONITORING_LOSS">Pérdida de monitoreo</mat-option></mat-select
+        ></mat-form-field
+      >
+      <mat-form-field class="wide" appearance="outline"
+        ><mat-label>Descripción de la situación</mat-label
+        ><textarea
+          matInput
+          rows="3"
+          formControlName="description"
+          maxlength="200"
+          placeholder="Detalle la condición observada y la intervención requerida"
+        ></textarea
+        ><mat-hint align="end">{{ form.controls.description.value.length }}/200</mat-hint>
+        @if (form.controls.description.touched && form.controls.description.invalid) {
+          <mat-error>Ingrese entre 10 y 200 caracteres.</mat-error>
+        }
+      </mat-form-field>
+      <div class="form-actions wide">
+        <button mat-flat-button type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Registrando…' : 'Registrar incidente' }}
+        </button>
+      </div>
+    </form>
+    @if (actionError()) {
+      <p class="error-text" role="alert">{{ actionError() }}</p>
+    }
+    @if (success()) {
+      <p class="success-banner" role="status">{{ success() }}</p>
+    }
+  </article>
+  <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
+    <mat-form-field appearance="outline"
+      ><mat-label>Buscar</mat-label
+      ><input
+        matInput
+        formControlName="searchTerm"
+        placeholder="Dispositivo o descripción"
+      /><mat-icon matSuffix>search</mat-icon></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Estado</mat-label
+      ><mat-select formControlName="status"
+        ><mat-option value="">Todos</mat-option><mat-option value="OPEN">Abierto</mat-option
+        ><mat-option value="UNDER_REVIEW">En revisión</mat-option
+        ><mat-option value="CLOSED">Cerrado</mat-option></mat-select
+      ></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Tipo</mat-label
+      ><mat-select formControlName="type"
+        ><mat-option value="">Todos</mat-option
+        ><mat-option value="QUALITY_INCIDENT">Calidad</mat-option
+        ><mat-option value="MONITORING_LOSS">Pérdida de monitoreo</mat-option></mat-select
+      ></mat-form-field
+    ><button mat-flat-button type="submit">Aplicar filtros</button>
+  </form>
+  <hg-monitoring-feedback [loading]="state.loading()" [error]="state.error()" (retry)="reload()" />
+  @if (state.data(); as result) {
+    <article class="panel">
+      <div class="table-scroll desktop-table">
+        <table class="monitoring-table">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Dispositivo</th>
+              <th>Descripción</th>
+              <th>Correlación</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (incident of result.items; track incident.id) {
+              <tr>
+                <td>{{ incident.incidentType | monitoringLabel }}</td>
+                <td>
+                  <strong>{{ incident.deviceSerialNumber }}</strong
+                  ><span class="secondary">{{ incident.reservoirName }}</span>
+                </td>
+                <td>{{ incident.description }}</td>
+                <td class="metric">{{ incident.correlationId || 'Pendiente' }}</td>
+                <td>{{ incident.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="status-chip {{ incident.status.toLowerCase().replace('_', '-') }}">{{
+                    incident.status | monitoringLabel
+                  }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="mobile-cards">
+        @for (incident of result.items; track incident.id) {
+          <article class="mobile-card">
+            <h3>{{ incident.incidentType | monitoringLabel }}</h3>
+            <p>{{ incident.deviceSerialNumber }} · {{ incident.reservoirName }}</p>
+            <p>{{ incident.description }}</p>
+            <p>
+              {{ incident.createdAt | date: 'dd/MM/yyyy HH:mm' }} ·
+              {{ incident.status | monitoringLabel }}
+            </p>
+          </article>
+        }
+      </div>
+      @if (!result.items.length) {
+        <div class="empty-state">
+          <mat-icon>fact_check</mat-icon>
+          <p>No existen incidentes para los filtros seleccionados.</p>
+        </div>
+      }
+      <footer class="pagination">
+        <span>{{ result.total }} incidente(s)</span
+        ><button
+          mat-button
+          type="button"
+          [disabled]="(query.page ?? 1) <= 1"
+          (click)="changePage(-1)"
+        >
+          Anterior</button
+        ><strong>Página {{ result.page }}</strong
+        ><button
+          mat-button
+          type="button"
+          [disabled]="result.page * result.pageSize >= result.total"
+          (click)="changePage(1)"
+        >
+          Siguiente
+        </button>
+      </footer>
+    </article>
+  }
+</section>
