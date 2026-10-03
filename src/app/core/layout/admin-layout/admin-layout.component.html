@@ -75,6 +75,48 @@
           <mat-icon class="nav-icon">badge</mat-icon>
           <span>Perfiles</span>
         </a>
+        <p class="nav-section-label nav-subsection">Monitoreo</p>
+        <a
+          class="nav-item"
+          routerLink="/monitoring"
+          routerLinkActive="active-nav"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          (click)="closeNavigation(drawer)"
+        >
+          <mat-icon class="nav-icon">monitor_heart</mat-icon>
+          <span>Estado operacional</span>
+        </a>
+        <a
+          class="nav-item"
+          routerLink="/monitoring/alerts"
+          routerLinkActive="active-nav"
+          ariaCurrentWhenActive="page"
+          (click)="closeNavigation(drawer)"
+        >
+          <mat-icon class="nav-icon">notifications_active</mat-icon>
+          <span>Alertas</span>
+        </a>
+        <a
+          class="nav-item"
+          routerLink="/monitoring/incidents"
+          routerLinkActive="active-nav"
+          ariaCurrentWhenActive="page"
+          (click)="closeNavigation(drawer)"
+        >
+          <mat-icon class="nav-icon">report_problem</mat-icon>
+          <span>Incidentes</span>
+        </a>
+        <a
+          class="nav-item"
+          routerLink="/monitoring/traceability"
+          routerLinkActive="active-nav"
+          ariaCurrentWhenActive="page"
+          (click)="closeNavigation(drawer)"
+        >
+          <mat-icon class="nav-icon">timeline</mat-icon>
+          <span>Trazabilidad</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">

@@ -90,6 +90,10 @@
   text-transform: uppercase;
 }
 
+.nav-section-label.nav-subsection {
+  margin-top: 24px;
+}
+
 .side-nav {
   display: flex;
   flex-direction: column;
