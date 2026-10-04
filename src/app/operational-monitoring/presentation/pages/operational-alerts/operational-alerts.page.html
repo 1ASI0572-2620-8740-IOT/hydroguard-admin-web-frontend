@@ -1,0 +1,147 @@
+<section class="monitoring-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Monitoreo operacional</p>
+      <h1>Alertas</h1>
+      <p>
+        Priorice desviaciones de calidad, bloqueos del proceso y pérdidas de comunicación que
+        requieren intervención.
+      </p>
+    </div>
+  </header>
+  <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
+    <mat-form-field appearance="outline"
+      ><mat-label>Buscar</mat-label
+      ><input
+        matInput
+        formControlName="searchTerm"
+        placeholder="Dispositivo, reservorio o descripción"
+      /><mat-icon matSuffix>search</mat-icon></mat-form-field
+    >
+    <mat-form-field appearance="outline"
+      ><mat-label>Estado</mat-label
+      ><mat-select formControlName="status"
+        ><mat-option value="">Todos</mat-option><mat-option value="ACTIVE">Activa</mat-option
+        ><mat-option value="ACKNOWLEDGED">Atendida</mat-option
+        ><mat-option value="RESOLVED">Resuelta</mat-option></mat-select
+      ></mat-form-field
+    >
+    <mat-form-field appearance="outline"
+      ><mat-label>Severidad</mat-label
+      ><mat-select formControlName="severity"
+        ><mat-option value="">Todas</mat-option><mat-option value="CRITICAL">Crítica</mat-option
+        ><mat-option value="HIGH">Alta</mat-option><mat-option value="MEDIUM">Media</mat-option
+        ><mat-option value="LOW">Baja</mat-option></mat-select
+      ></mat-form-field
+    >
+    <button mat-flat-button type="submit">Aplicar filtros</button>
+  </form>
+  <hg-monitoring-feedback [loading]="state.loading()" [error]="state.error()" (retry)="reload()" />
+  @if (actionError()) {
+    <p class="error-text" role="alert">{{ actionError() }}</p>
+  }
+  @if (state.data(); as result) {
+    <article class="panel">
+      <div class="table-scroll desktop-table">
+        <table class="monitoring-table">
+          <thead>
+            <tr>
+              <th>Severidad</th>
+              <th>Dispositivo</th>
+              <th>Descripción</th>
+              <th>Origen</th>
+              <th>Registrada</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (alert of result.items; track alert.id) {
+              <tr>
+                <td>
+                  <span class="severity-chip {{ alert.severity.toLowerCase() }}">{{
+                    alert.severity | monitoringLabel
+                  }}</span>
+                </td>
+                <td>
+                  <strong>{{ alert.deviceSerialNumber }}</strong
+                  ><span class="secondary">{{ alert.reservoirName }}</span>
+                </td>
+                <td>{{ alert.description }}</td>
+                <td>{{ alert.source }}</td>
+                <td>{{ alert.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="status-chip {{ alert.status.toLowerCase() }}">{{
+                    alert.status | monitoringLabel
+                  }}</span>
+                </td>
+                <td class="action-cell">
+                  @if (alert.status === 'ACTIVE') {
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      [disabled]="actionId() === alert.id"
+                      (click)="acknowledge(alert)"
+                    >
+                      Marcar atendida
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="mobile-cards">
+        @for (alert of result.items; track alert.id) {
+          <article class="mobile-card">
+            <h3>
+              <span class="severity-chip {{ alert.severity.toLowerCase() }}">{{
+                alert.severity | monitoringLabel
+              }}</span>
+              {{ alert.deviceSerialNumber }}
+            </h3>
+            <p>{{ alert.reservoirName }}</p>
+            <p>{{ alert.description }}</p>
+            <p>
+              {{ alert.createdAt | date: 'dd/MM/yyyy HH:mm' }} ·
+              {{ alert.status | monitoringLabel }}
+            </p>
+            @if (alert.status === 'ACTIVE') {
+              <div class="card-actions">
+                <button mat-stroked-button type="button" (click)="acknowledge(alert)">
+                  Marcar atendida
+                </button>
+              </div>
+            }
+          </article>
+        }
+      </div>
+      @if (!result.items.length) {
+        <div class="empty-state">
+          <mat-icon>notifications_off</mat-icon>
+          <p>No existen alertas para los filtros seleccionados.</p>
+        </div>
+      }
+      <footer class="pagination">
+        <span>{{ result.total }} alerta(s)</span
+        ><button
+          mat-button
+          type="button"
+          [disabled]="(query.page ?? 1) <= 1"
+          (click)="changePage(-1)"
+        >
+          Anterior</button
+        ><strong>Página {{ result.page }}</strong
+        ><button
+          mat-button
+          type="button"
+          [disabled]="result.page * result.pageSize >= result.total"
+          (click)="changePage(1)"
+        >
+          Siguiente
+        </button>
+      </footer>
+    </article>
+  }
+</section>

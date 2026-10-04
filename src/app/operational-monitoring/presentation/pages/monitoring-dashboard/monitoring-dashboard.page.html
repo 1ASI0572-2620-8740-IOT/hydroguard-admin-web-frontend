@@ -1,0 +1,170 @@
+<section class="monitoring-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Operational Monitoring & Traceability</p>
+      <h1>Centro de monitoreo</h1>
+      <p>
+        Supervise la condición actual de cada dispositivo, identifique interrupciones y acceda a la
+        evidencia completa de cada decisión operativa.
+      </p>
+    </div>
+    <div class="heading-actions">
+      <a mat-stroked-button routerLink="/monitoring/traceability"
+        ><mat-icon>timeline</mat-icon> Consultar trazabilidad</a
+      ><button mat-flat-button type="button" (click)="reload()">
+        <mat-icon>refresh</mat-icon> Actualizar
+      </button>
+    </div>
+  </header>
+  <hg-monitoring-feedback [loading]="state.loading()" [error]="state.error()" (retry)="reload()" />
+  @if (state.data(); as overview) {
+    <div class="stat-grid" aria-label="Resumen operacional">
+      <article class="stat-card">
+        <span class="icon"><mat-icon>developer_board</mat-icon></span
+        ><strong>{{ overview.totalDevices }}</strong
+        ><span>Dispositivos supervisados</span>
+      </article>
+      <article class="stat-card">
+        <span class="icon"><mat-icon>wifi</mat-icon></span
+        ><strong>{{ overview.onlineDevices }}</strong
+        ><span>En línea ahora</span>
+      </article>
+      <article class="stat-card">
+        <span class="icon warning"><mat-icon>visibility</mat-icon></span
+        ><strong>{{ overview.devicesRequiringAttention }}</strong
+        ><span>Requieren atención</span>
+      </article>
+      <article class="stat-card">
+        <span class="icon danger"><mat-icon>notification_important</mat-icon></span
+        ><strong>{{ overview.activeAlerts }}</strong
+        ><span>Alertas activas</span>
+      </article>
+      <article class="stat-card">
+        <span class="icon warning"><mat-icon>report_problem</mat-icon></span
+        ><strong>{{ overview.openIncidents }}</strong
+        ><span>Incidentes abiertos</span>
+      </article>
+    </div>
+    <div class="content-grid">
+      <article class="panel">
+        <header class="panel-header">
+          <h2>Estado de los dispositivos</h2>
+          <span class="muted">Última medición disponible</span>
+        </header>
+        <div class="table-scroll desktop-table">
+          <table class="monitoring-table">
+            <thead>
+              <tr>
+                <th>Dispositivo</th>
+                <th>Proceso</th>
+                <th>pH</th>
+                <th>Temperatura</th>
+                <th>Actualización</th>
+                <th>Alertas</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (device of overview.devices; track device.deviceId) {
+                <tr>
+                  <td>
+                    <a
+                      class="primary-link"
+                      [routerLink]="['/monitoring/traceability']"
+                      [queryParams]="{ deviceId: device.deviceId }"
+                      >{{ device.alias || device.serialNumber }}</a
+                    ><span class="secondary"
+                      >{{ device.reservoirName }} · {{ device.serialNumber }}</span
+                    >
+                  </td>
+                  <td>
+                    <span class="status-chip {{ device.processState.toLowerCase() }}">{{
+                      device.processState | monitoringLabel
+                    }}</span
+                    ><span class="secondary">{{ device.availability | monitoringLabel }}</span>
+                  </td>
+                  <td class="metric">
+                    {{ device.ph === null ? '—' : (device.ph | number: '1.1-2') }}
+                  </td>
+                  <td class="metric">
+                    {{
+                      device.temperature === null
+                        ? '—'
+                        : (device.temperature | number: '1.1-1') + ' °C'
+                    }}
+                  </td>
+                  <td>
+                    <span class="status-chip {{ device.statusView.toLowerCase() }}">{{
+                      device.statusView | monitoringLabel
+                    }}</span
+                    ><span class="secondary">{{
+                      device.measuredAt
+                        ? (device.measuredAt | date: 'dd/MM/yyyy HH:mm')
+                        : 'Sin mediciones'
+                    }}</span>
+                  </td>
+                  <td>
+                    <strong [class.error-text]="device.activeAlertCount > 0">{{
+                      device.activeAlertCount
+                    }}</strong>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="mobile-cards">
+          @for (device of overview.devices; track device.deviceId) {
+            <article class="mobile-card">
+              <h3>{{ device.alias || device.serialNumber }}</h3>
+              <p>{{ device.reservoirName }} · {{ device.serialNumber }}</p>
+              <p>
+                <span class="status-chip {{ device.processState.toLowerCase() }}">{{
+                  device.processState | monitoringLabel
+                }}</span>
+                · pH {{ device.ph ?? '—' }} · {{ device.temperature ?? '—' }} °C
+              </p>
+              <div class="card-actions">
+                <a
+                  mat-stroked-button
+                  [routerLink]="['/monitoring/traceability']"
+                  [queryParams]="{ deviceId: device.deviceId }"
+                  >Ver trazabilidad</a
+                >
+              </div>
+            </article>
+          }
+        </div>
+        @if (!overview.devices.length) {
+          <div class="empty-state">
+            <mat-icon>water_drop</mat-icon>
+            <p>No existen dispositivos supervisables en esta organización.</p>
+          </div>
+        }
+      </article>
+      <aside class="panel">
+        <header class="panel-header">
+          <h2>Alertas recientes</h2>
+          <a routerLink="/monitoring/alerts">Ver todas</a>
+        </header>
+        <div class="alert-stack">
+          @for (alert of overview.recentAlerts; track alert.id) {
+            <article class="alert-item" [class.critical]="alert.severity === 'CRITICAL'">
+              <h3>{{ alert.severity | monitoringLabel }} · {{ alert.deviceSerialNumber }}</h3>
+              <p>{{ alert.description }}</p>
+              <div class="alert-meta">
+                <span>{{ alert.reservoirName }}</span
+                ><time>{{ alert.createdAt | date: 'dd/MM HH:mm' }}</time>
+              </div>
+            </article>
+          }
+          @if (!overview.recentAlerts.length) {
+            <div class="empty-state">
+              <mat-icon>check_circle</mat-icon>
+              <p>No hay alertas activas.</p>
+            </div>
+          }
+        </div>
+      </aside>
+    </div>
+  }
+</section>

@@ -18,8 +18,8 @@ export class PageActions {
     confirmation?: string,
     form?: AbstractControl,
     refreshAfterSuccess = true,
-  ): Promise<void> {
-    if (this.submitting()) return;
+  ): Promise<boolean> {
+    if (this.submitting()) return false;
     this.submitting.set(true);
     this.error.set(null);
     this.success.set(null);
@@ -32,11 +32,12 @@ export class PageActions {
             })
             .afterClosed(),
         );
-        if (!confirmed) return;
+        if (!confirmed) return false;
       }
       await command();
       this.success.set(label + ': operación completada.');
       if (refreshAfterSuccess) await refresh?.();
+      return true;
     } catch (error: unknown) {
       this.error.set(getErrorMessage(error, 'No se pudo completar la operación.'));
       if (
@@ -51,6 +52,7 @@ export class PageActions {
         }
       }
       if (error instanceof AppHttpError && error.statusCode === 409) await refresh?.();
+      return false;
     } finally {
       this.submitting.set(false);
     }

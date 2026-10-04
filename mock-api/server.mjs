@@ -3,6 +3,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { readFile, writeFile, rename } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { handleConfiguration, isConfigurationPath } from './configuration/routes.mjs';
+import { handleMonitoring, isMonitoringPath } from './monitoring/routes.mjs';
 import { closeAssignment, hasProcess } from './configuration/helpers.mjs';
 
 const PORT = Number(process.env.PORT || 3000);
@@ -273,6 +274,13 @@ const handleRequest = async (req, res) => {
     if (isConfigurationPath(path)) {
       const body = ['POST', 'PATCH'].includes(req.method) ? await readBody(req) : {};
       const result = handleConfiguration({ method: req.method, url, body, db, organizationId });
+      if (result.changed) await saveDb(db);
+      return send(res, result.status, result.body);
+    }
+
+    if (isMonitoringPath(path)) {
+      const body = ['POST', 'PATCH', 'PUT'].includes(req.method) ? await readBody(req) : {};
+      const result = handleMonitoring({ method: req.method, url, body, db, organizationId });
       if (result.changed) await saveDb(db);
       return send(res, result.status, result.body);
     }

@@ -41,6 +41,11 @@ export const routes: Routes = [
       },
       {
         path: '',
+        loadChildren: () =>
+          import('./operational-monitoring/presentation/routes').then((m) => m.MONITORING_ROUTES),
+      },
+      {
+        path: '',
         loadChildren: () => import('./iam/presentation/routes').then((m) => m.IAM_ROUTES),
       },
     ],

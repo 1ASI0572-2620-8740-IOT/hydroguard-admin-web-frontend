@@ -1,0 +1,147 @@
+<section class="monitoring-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Historial, reportes y trazabilidad</p>
+      <h1>Trazabilidad operacional</h1>
+      <p>
+        Correlacione mediciones, evaluaciones, ciclos correctivos, alertas y liberaciones para
+        reconstruir cómo se tomó cada decisión.
+      </p>
+    </div>
+  </header>
+  <form class="filter-panel" [formGroup]="filters" (ngSubmit)="reload()">
+    <mat-form-field appearance="outline"
+      ><mat-label>Dispositivo</mat-label
+      ><mat-select formControlName="deviceId">
+        @for (device of devices(); track device.deviceId) {
+          <mat-option [value]="device.deviceId"
+            >{{ device.serialNumber }} · {{ device.reservoirName }}</mat-option
+          >
+        }
+      </mat-select></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Desde</mat-label
+      ><input matInput type="date" formControlName="from" /></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Hasta</mat-label
+      ><input matInput type="date" formControlName="to" /></mat-form-field
+    ><button mat-flat-button type="submit" [disabled]="filters.invalid">Consultar</button>
+  </form>
+  <hg-monitoring-feedback [loading]="state.loading()" [error]="state.error()" (retry)="reload()" />
+  @if (actionError()) {
+    <p class="error-text" role="alert">{{ actionError() }}</p>
+  }
+  @if (state.data(); as detail) {
+    <article class="panel">
+      <header class="panel-header">
+        <h2>{{ detail.device.alias || detail.device.serialNumber }}</h2>
+        <span class="status-chip {{ detail.device.processState.toLowerCase() }}">{{
+          detail.device.processState | monitoringLabel
+        }}</span>
+      </header>
+      <div class="device-summary">
+        <div class="summary-cell">
+          <span>Dispositivo</span><strong>{{ detail.device.serialNumber }}</strong>
+        </div>
+        <div class="summary-cell">
+          <span>Reservorio</span><strong>{{ detail.device.reservoirName }}</strong>
+        </div>
+        <div class="summary-cell">
+          <span>Último pH</span
+          ><strong>{{
+            detail.device.ph === null ? '—' : (detail.device.ph | number: '1.1-2')
+          }}</strong>
+        </div>
+        <div class="summary-cell">
+          <span>Temperatura</span
+          ><strong>{{
+            detail.device.temperature === null
+              ? '—'
+              : (detail.device.temperature | number: '1.1-1') + ' °C'
+          }}</strong>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="generating() || !detail.events.length"
+          (click)="generateReport()"
+        >
+          <mat-icon>description</mat-icon>{{ generating() ? 'Generando…' : 'Generar reporte' }}
+        </button>
+      </div>
+    </article>
+    @if (report(); as generated) {
+      <article class="panel">
+        <header class="panel-header">
+          <h2>Reporte generado</h2>
+          <button mat-flat-button type="button" (click)="downloadCsv()">
+            <mat-icon>download</mat-icon> Exportar CSV
+          </button>
+        </header>
+        <p class="success-banner">
+          Reporte {{ generated.id }} generado el
+          {{ generated.generatedAt | date: 'dd/MM/yyyy HH:mm' }}.
+        </p>
+        <div class="report-summary">
+          <div>
+            <strong>{{ generated.measurements }}</strong
+            ><span>Mediciones</span>
+          </div>
+          <div>
+            <strong>{{ generated.correctionCycles }}</strong
+            ><span>Ciclos</span>
+          </div>
+          <div>
+            <strong>{{ generated.alerts }}</strong
+            ><span>Alertas</span>
+          </div>
+          <div>
+            <strong>{{ generated.incidents }}</strong
+            ><span>Incidentes</span>
+          </div>
+          <div>
+            <strong>{{ generated.releases }}</strong
+            ><span>Liberaciones</span>
+          </div>
+        </div>
+      </article>
+    }
+    <article class="panel">
+      <header class="panel-header">
+        <h2>Línea temporal correlacionada</h2>
+        <span class="muted">{{ detail.events.length }} evento(s)</span>
+      </header>
+      @if (detail.events.length) {
+        <div class="timeline">
+          @for (event of detail.events; track event.id) {
+            <article class="timeline-event {{ event.outcome.toLowerCase() }}">
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.description }}</p>
+              <div class="timeline-meta">
+                <time>{{ event.occurredAt | date: 'dd/MM/yyyy HH:mm:ss' }}</time
+                ><span>{{ event.actor }}</span
+                ><span>Correlación: {{ event.correlationId }}</span>
+                @if (event.cycleId) {
+                  <span>Ciclo: {{ event.cycleId }}</span>
+                }
+                @if (event.ph !== null) {
+                  <span>pH {{ event.ph }}</span>
+                }
+                @if (event.temperature !== null) {
+                  <span>{{ event.temperature }} °C</span>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <mat-icon>history</mat-icon>
+          <p>No existen eventos en el periodo seleccionado.</p>
+        </div>
+      }
+    </article>
+  }
+</section>
