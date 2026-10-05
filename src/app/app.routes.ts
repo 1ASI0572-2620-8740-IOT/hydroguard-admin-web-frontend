@@ -28,11 +28,8 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'users' },
       {
         path: 'telemetry',
-        loadComponent: () =>
-          import(
-            './contexts/telemetry/presentation/pages/telemetry-overview/telemetry-overview.component'
-          ).then((m) => m.TelemetryOverviewComponent),
-        title: 'Monitoreo de Telemetría — HydroGuard Admin',
+        loadChildren: () =>
+          import('./telemetry/presentation/routes').then((m) => m.TELEMETRY_ROUTES),
       },
       {
         path: '',

@@ -1,0 +1,193 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Supervisión de Telemetría IoT</h1>
+      <p>
+        Supervisión en tiempo real de mediciones de pH, temperatura y disponibilidad de hardware (ESP32 físico / Wokwi simulado).
+      </p>
+    </div>
+    <div class="actions">
+      <button mat-stroked-button type="button" (click)="reload()" [disabled]="state.loading()">
+        <mat-icon>refresh</mat-icon>
+        Actualizar mediciones
+      </button>
+    </div>
+  </header>
+
+  <hg-query-feedback [loading]="state.loading()" [error]="state.error()" (retry)="reload()" />
+
+  <hg-list-controls
+    [query]="query"
+    [total]="state.data()?.total ?? 0"
+    [loading]="state.loading()"
+    (changed)="change($event)"
+  />
+
+  <form [formGroup]="filters" class="grid" (submit)="$event.preventDefault()">
+    <mat-form-field appearance="outline">
+      <mat-label>Disponibilidad (Heartbeat)</mat-label>
+      <mat-select formControlName="availability" (selectionChange)="filter()">
+        <mat-option value="">Todas</mat-option>
+        <mat-option value="ONLINE">{{ 'ONLINE' | telemetryLabel }}</mat-option>
+        <mat-option value="DELAYED">{{ 'DELAYED' | telemetryLabel }}</mat-option>
+        <mat-option value="OFFLINE">{{ 'OFFLINE' | telemetryLabel }}</mat-option>
+        <mat-option value="UNKNOWN">{{ 'UNKNOWN' | telemetryLabel }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Entorno de Operación</mat-label>
+      <mat-select formControlName="operatingEnvironment" (selectionChange)="filter()">
+        <mat-option value="">Todos los entornos</mat-option>
+        <mat-option value="INTEGRAL_PRODUCT">{{ 'INTEGRAL_PRODUCT' | telemetryLabel }}</mat-option>
+        <mat-option value="SIMULATION">{{ 'SIMULATION' | telemetryLabel }}</mat-option>
+        <mat-option value="ACADEMIC_PROTOTYPE">{{ 'ACADEMIC_PROTOTYPE' | telemetryLabel }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+
+  @if (state.data(); as result) {
+    <div class="table-scroll">
+      <table
+        mat-table
+        [dataSource]="result.items"
+        matSort
+        [matSortActive]="query.sortBy ?? 'serialNumber'"
+        [matSortDirection]="query.sortDirection ?? 'asc'"
+        (matSortChange)="sort($event)"
+      >
+        <!-- Columna Serie & Alias -->
+        <ng-container matColumnDef="serialNumber">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="serialNumber">Dispositivo</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/telemetry/devices', item.device.id]">
+              <strong>{{ item.device.serialNumber }}</strong>
+            </a>
+            @if (item.device.alias) {
+              <div class="device-alias">{{ item.device.alias }}</div>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Entorno de Operación -->
+        <ng-container matColumnDef="environment">
+          <th mat-header-cell *matHeaderCellDef>Entorno</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.device.operatingEnvironment | telemetryLabel }}
+          </td>
+        </ng-container>
+
+        <!-- Disponibilidad / Heartbeat -->
+        <ng-container matColumnDef="availability">
+          <th mat-header-cell *matHeaderCellDef>Disponibilidad</th>
+          <td mat-cell *matCellDef="let item">
+            <span
+              class="badge-status"
+              [ngClass]="{
+                'badge-online': item.device.availability === 'ONLINE',
+                'badge-delayed': item.device.availability === 'DELAYED',
+                'badge-offline': item.device.availability === 'OFFLINE',
+                'badge-unknown': item.device.availability === 'UNKNOWN'
+              }"
+            >
+              <span
+                class="status-dot"
+                [ngClass]="{
+                  'dot-online': item.device.availability === 'ONLINE',
+                  'dot-delayed': item.device.availability === 'DELAYED',
+                  'dot-offline': item.device.availability === 'OFFLINE',
+                  'dot-unknown': item.device.availability === 'UNKNOWN'
+                }"
+              ></span>
+              {{ item.device.availability | telemetryLabel }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Última comunicación -->
+        <ng-container matColumnDef="lastCommunication">
+          <th mat-header-cell *matHeaderCellDef>Último Heartbeat</th>
+          <td mat-cell *matCellDef="let item">
+            @if (item.device.lastCommunicationAt) {
+              {{ item.device.lastCommunicationAt | date: 'dd/MM/yy HH:mm:ss' }}
+            } @else {
+              <span class="no-data">Sin registro</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Última Lectura pH -->
+        <ng-container matColumnDef="latestPh">
+          <th mat-header-cell *matHeaderCellDef>Último pH</th>
+          <td mat-cell *matCellDef="let item">
+            @if (item.latestMeasurement) {
+              <span class="metric-pill">{{ item.latestMeasurement.ph | number: '1.2-2' }}</span>
+            } @else {
+              <span class="no-data">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Última Temperatura -->
+        <ng-container matColumnDef="latestTemperature">
+          <th mat-header-cell *matHeaderCellDef>Temperatura</th>
+          <td mat-cell *matCellDef="let item">
+            @if (item.latestMeasurement) {
+              <span class="metric-pill">{{ item.latestMeasurement.temperature | number: '1.1-1' }} °C</span>
+            } @else {
+              <span class="no-data">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Fuente -->
+        <ng-container matColumnDef="source">
+          <th mat-header-cell *matHeaderCellDef>Fuente de Lectura</th>
+          <td mat-cell *matCellDef="let item">
+            @if (item.latestMeasurement) {
+              <span class="source-tag">
+                <mat-icon style="font-size: 14px; width: 14px; height: 14px;">
+                  {{ item.latestMeasurement.source === 'SIMULATOR' ? 'memory' : 'router' }}
+                </mat-icon>
+                {{ item.latestMeasurement.source | telemetryLabel }}
+              </span>
+            } @else {
+              <span class="no-data">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let item">
+            <button
+              mat-icon-button
+              type="button"
+              (click)="openDetailDialog(item)"
+              matTooltip="Supervisión en modal"
+              aria-label="Abrir modal de telemetría"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <a
+              mat-icon-button
+              [routerLink]="['/telemetry/devices', item.device.id]"
+              matTooltip="Ver historial completo de mediciones"
+              aria-label="Ir a detalle del dispositivo"
+            >
+              <mat-icon>query_stats</mat-icon>
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+
+      @if (result.items.length === 0) {
+        <p class="empty">No se encontraron dispositivos en la organización para los filtros aplicados.</p>
+      }
+    </div>
+  }
+</section>
