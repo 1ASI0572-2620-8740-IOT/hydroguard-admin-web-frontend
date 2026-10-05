@@ -72,7 +72,7 @@ export class TelemetryDetailDialogComponent implements OnInit {
     return this.historyState.load((signal) =>
       this.listMeasurements.execute(
         this.summary.device.id,
-        { page: 1, pageSize: 5, sortBy: 'recordedAt', sortDirection: 'desc' },
+        { page: 1, pageSize: 5, sortBy: 'measuredAt', sortDirection: 'desc' },
         signal,
       ),
     );

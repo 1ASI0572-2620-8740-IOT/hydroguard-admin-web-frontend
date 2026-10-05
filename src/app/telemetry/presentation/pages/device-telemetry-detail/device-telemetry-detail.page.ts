@@ -63,7 +63,7 @@ export class DeviceTelemetryDetailPage implements OnInit {
   query: MeasurementQuery = {
     page: 1,
     pageSize: 10,
-    sortBy: 'recordedAt',
+    sortBy: 'measuredAt',
     sortDirection: 'desc',
   };
 
