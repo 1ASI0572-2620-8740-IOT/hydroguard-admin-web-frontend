@@ -9,7 +9,7 @@ export const mapMeasurement = (dto: WaterMeasurementDto): WaterMeasurement => ({
   deviceId: dto.deviceId,
   ph: dto.ph,
   temperature: dto.temperature,
-  recordedAt: dto.recordedAt,
+  recordedAt: dto.measuredAt,
   source: dto.source,
 });
 

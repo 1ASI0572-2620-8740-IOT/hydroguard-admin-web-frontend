@@ -8,7 +8,7 @@ export interface WaterMeasurementDto {
   deviceId: string;
   ph: number;
   temperature: number;
-  recordedAt: string;
+  measuredAt: string;
   source: 'DEVICE' | 'SIMULATOR';
 }
 

@@ -10,8 +10,8 @@ export const isTelemetryPath = (path) =>
   /^\/api\/v1\/telemetry(\/|$)/.test(path);
 
 export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
-  if (!db.waterMeasurements) {
-    db.waterMeasurements = [];
+  if (!db.measurements) {
+    db.measurements = [];
   }
 
   const parts = url.pathname.slice('/api/v1/'.length).split('/').map(decodeURIComponent);
@@ -63,9 +63,9 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
 
     // Mapear cada dispositivo con su última medición y regla de heartbeat
     const items = paginatedDevices.map((device) => {
-      const measurements = db.waterMeasurements
+      const measurements = db.measurements
         .filter((m) => m.deviceId === device.id && m.organizationId === organizationId)
-        .sort((a, b) => Date.parse(b.recordedAt) - Date.parse(a.recordedAt));
+        .sort((a, b) => Date.parse(b.measuredAt) - Date.parse(a.measuredAt));
 
       const latestMeasurement = measurements[0] ?? null;
 
@@ -87,7 +87,7 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
           lifecycleStatus: device.lifecycleStatus,
           availability: device.availability,
           reservoirId: device.reservoirId ?? null,
-          lastCommunicationAt: device.lastCommunicationAt ?? (latestMeasurement?.recordedAt ?? null),
+          lastCommunicationAt: device.lastCommunicationAt ?? (latestMeasurement?.measuredAt ?? null),
           configurationStatus: device.configurationStatus ?? 'COMPATIBLE',
           currentConfigurationVersion: device.currentConfigurationVersion ?? 1,
         },
@@ -114,9 +114,9 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
 
     // GET /api/v1/devices/:deviceId/water-measurements/latest
     if (parts.length === 4 && parts[3] === 'latest' && method === 'GET') {
-      const measurements = db.waterMeasurements
+      const measurements = db.measurements
         .filter((m) => m.deviceId === device.id && m.organizationId === organizationId)
-        .sort((a, b) => Date.parse(b.recordedAt) - Date.parse(a.recordedAt));
+        .sort((a, b) => Date.parse(b.measuredAt) - Date.parse(a.measuredAt));
 
       const latest = measurements[0];
       if (!latest) {
@@ -130,7 +130,7 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
 
     // GET /api/v1/devices/:deviceId/water-measurements (historial paginado)
     if (parts.length === 3 && method === 'GET') {
-      let measurements = db.waterMeasurements.filter(
+      let measurements = db.measurements.filter(
         (m) => m.deviceId === device.id && m.organizationId === organizationId,
       );
 
@@ -143,20 +143,20 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
       }
       if (from) {
         const fromTime = Date.parse(from);
-        measurements = measurements.filter((m) => Date.parse(m.recordedAt) >= fromTime);
+        measurements = measurements.filter((m) => Date.parse(m.measuredAt) >= fromTime);
       }
       if (to) {
         const toTime = Date.parse(to);
-        measurements = measurements.filter((m) => Date.parse(m.recordedAt) <= toTime);
+        measurements = measurements.filter((m) => Date.parse(m.measuredAt) <= toTime);
       }
 
       // Ordenamiento por fecha por defecto
       const sortDirection = url.searchParams.get('sortDirection') === 'asc' ? 1 : -1;
-      const sortBy = url.searchParams.get('sortBy') || 'recordedAt';
+      const sortBy = url.searchParams.get('sortBy') || 'measuredAt';
 
       measurements.sort((a, b) => {
-        if (sortBy === 'recordedAt') {
-          return sortDirection * (Date.parse(a.recordedAt) - Date.parse(b.recordedAt));
+        if (sortBy === 'measuredAt') {
+          return sortDirection * (Date.parse(a.measuredAt) - Date.parse(b.measuredAt));
         }
         if (sortBy === 'ph') {
           return sortDirection * (a.ph - b.ph);
