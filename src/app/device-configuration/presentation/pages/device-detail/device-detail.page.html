@@ -19,6 +19,8 @@
         <dd>{{ data.device.lifecycleStatus | configurationLabel }}</dd>
         <dt>Disponibilidad</dt>
         <dd>{{ data.device.availability | configurationLabel }}</dd>
+        <dt>Identidad técnica</dt>
+        <dd>{{ data.device.identityStatus | configurationLabel }}</dd>
         <dt>Última comunicación</dt>
         <dd>
           {{
@@ -99,6 +101,15 @@
     @if (data.device.lifecycleStatus !== 'INACTIVE') {
       <button mat-stroked-button [disabled]="actions.submitting()" (click)="disable()">
         Desactivar dispositivo
+      </button>
+    }
+    @if (data.device.identityStatus !== 'REVOKED') {
+      <button
+        mat-stroked-button
+        [disabled]="actions.submitting()"
+        (click)="revokeDeviceIdentity()"
+      >
+        Revocar identidad técnica
       </button>
     }
   }

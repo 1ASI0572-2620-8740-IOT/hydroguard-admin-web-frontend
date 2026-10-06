@@ -19,6 +19,7 @@ import { LinkDeviceUseCase } from '../../../application/use-cases/link-device.us
 import { UnlinkDeviceUseCase } from '../../../application/use-cases/unlink-device.use-case';
 import { DeactivateDeviceUseCase } from '../../../application/use-cases/deactivate-device.use-case';
 import { GetOperationalOptionsUseCase } from '../../../application/use-cases/get-operational-options.use-case';
+import { RevokeDeviceIdentityUseCase } from '../../../application/use-cases/revoke-device-identity.use-case';
 @Component({
   selector: 'hg-device-detail-page',
   standalone: true,
@@ -46,6 +47,7 @@ export class DeviceDetailPage implements OnInit {
   private readonly unlinkDevice = inject(UnlinkDeviceUseCase);
   private readonly deactivate = inject(DeactivateDeviceUseCase);
   private readonly getOptions = inject(GetOperationalOptionsUseCase);
+  private readonly revokeIdentity = inject(RevokeDeviceIdentityUseCase);
   readonly state = new QueryState<DeviceDetail>();
   readonly options = new QueryState<OperationalOptions>();
   readonly form = inject(FormBuilder).nonNullable.group({ reservoirId: ['', Validators.required] });
@@ -100,6 +102,15 @@ export class DeviceDetailPage implements OnInit {
       () => this.deactivate.execute(id),
       () => this.load(),
       'Se conservará el dispositivo y su historial. Debe estar sin vinculación, asignación ni proceso activo.',
+    );
+  }
+  revokeDeviceIdentity() {
+    const id = this.id;
+    return this.actions.run(
+      'Revocar identidad técnica',
+      () => this.revokeIdentity.execute(id),
+      () => this.load(),
+      'El dispositivo dejará de autenticarse, enviar telemetría y consultar comandos. Esta acción no elimina su historial.',
     );
   }
 }

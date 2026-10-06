@@ -2,9 +2,33 @@
   <a mat-button routerLink="/devices">Volver a dispositivos</a>
   <h1>Registrar dispositivo</h1>
   <p>
-    El alta activa el dispositivo sin vincularlo. La disponibilidad se obtiene de su comunicación.
+    El alta activa el dispositivo sin vincularlo y provisiona su identidad técnica. La credencial se
+    mostrará una sola vez.
   </p>
   <hg-action-feedback [error]="actions.error()" [success]="actions.success()" />
+  @if (registered(); as result) {
+    <div class="panel" role="status">
+      <h2>Dispositivo registrado</h2>
+      <p>
+        Guarde esta credencial en el dispositivo. Por seguridad no volverá a mostrarse en listados ni
+        en el detalle.
+      </p>
+      <dl>
+        <dt>Dispositivo</dt>
+        <dd>{{ result.device.alias }} · {{ result.device.serialNumber }}</dd>
+        <dt>Estado de identidad</dt>
+        <dd>{{ result.device.identityStatus | configurationLabel }}</dd>
+        <dt>Credencial de activación</dt>
+        <dd><code>{{ result.activationCredential }}</code></dd>
+      </dl>
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="copyCredential()">
+          {{ credentialCopied() ? 'Credencial copiada' : 'Copiar credencial' }}
+        </button>
+        <a mat-flat-button [routerLink]="['/devices', result.device.id]">Continuar al detalle</a>
+      </div>
+    </div>
+  } @else {
   <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline"
       ><mat-label>Número de serie</mat-label
@@ -41,4 +65,5 @@
       ><a mat-button routerLink="/devices">Cancelar</a>
     </div>
   </form>
+  }
 </section>

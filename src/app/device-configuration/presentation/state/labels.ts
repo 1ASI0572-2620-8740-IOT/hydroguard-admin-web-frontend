@@ -26,6 +26,8 @@ const labels: Readonly<Record<string, string>> = {
   MISSING: 'Sin configuración publicada',
   COMPATIBLE: 'Configuración compatible',
   INCOMPATIBLE: 'Configuración incompatible',
+  PENDING: 'Identidad pendiente',
+  REVOKED: 'Identidad revocada',
   SUMP: 'Fosa',
   TANK: 'Tanque',
   RESERVOIR: 'Reservorio',

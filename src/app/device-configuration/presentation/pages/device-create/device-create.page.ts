@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,7 +12,11 @@ import { FieldErrorComponent } from '../../components/field-error/field-error.co
 import { ConfigurationLabelPipe } from '../../state/labels';
 
 import { CreateDeviceUseCase } from '../../../application/use-cases/create-device.use-case';
-import { DeviceCapability, OperatingEnvironment } from '../../../domain/models/device';
+import {
+  DeviceCapability,
+  OperatingEnvironment,
+  RegisteredDevice,
+} from '../../../domain/models/device';
 @Component({
   selector: 'hg-device-create-page',
   standalone: true,
@@ -33,8 +37,9 @@ import { DeviceCapability, OperatingEnvironment } from '../../../domain/models/d
 })
 export class DeviceCreatePage {
   private readonly create = inject(CreateDeviceUseCase);
-  private readonly router = inject(Router);
   readonly actions = inject(PageActions);
+  readonly registered = signal<RegisteredDevice | null>(null);
+  readonly credentialCopied = signal(false);
   readonly capabilities: ReadonlyArray<DeviceCapability> = [
     'PH_SENSOR',
     'TEMPERATURE_SENSOR',
@@ -67,12 +72,17 @@ export class DeviceCreatePage {
     await this.actions.run(
       'Registrar dispositivo',
       async () => {
-        const device = await this.create.execute(this.form.getRawValue());
-        await this.router.navigate(['/devices', device.id]);
+        this.registered.set(await this.create.execute(this.form.getRawValue()));
       },
       undefined,
       undefined,
       this.form,
     );
+  }
+  async copyCredential() {
+    const credential = this.registered()?.activationCredential;
+    if (!credential) return;
+    await navigator.clipboard.writeText(credential);
+    this.credentialCopied.set(true);
   }
 }

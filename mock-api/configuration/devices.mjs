@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   active,
   assigned,
@@ -17,6 +18,19 @@ import {
 } from './helpers.mjs';
 
 export const handleDevices = ({ method, parts, url, body, db, organizationId }) => {
+  if (parts[0] === 'device-identities' && parts.length === 3 && parts[2] === 'revoke') {
+    if (method !== 'POST') return null;
+    find(db.devices, parts[1], organizationId);
+    const identity = (db.deviceIdentities ?? []).find(
+      (item) => item.deviceId === parts[1] && item.organizationId === organizationId,
+    );
+    if (!identity) fail(404, 'La identidad técnica no existe.');
+    if (identity.status === 'REVOKED') fail(409, 'La identidad técnica ya está revocada.');
+    identity.status = 'REVOKED';
+    identity.revokedAt = new Date().toISOString();
+    identity.updatedAt = identity.revokedAt;
+    return { status: 204, changed: true };
+  }
   if (parts[0] !== 'devices') return null;
   if (parts.length === 1 && method === 'GET') {
     let devices = scoped(db.devices, organizationId).map((item) => deviceView(db, item));
@@ -77,7 +91,24 @@ export const handleDevices = ({ method, parts, url, body, db, organizationId }) 
       lastCommunicationAt: null,
     });
     db.devices.push(device);
-    return { status: 201, body: deviceView(db, device), changed: true };
+    const now = new Date().toISOString();
+    const activationCredential = 'hgdev_' + randomUUID().replaceAll('-', '');
+    db.deviceIdentities ??= [];
+    db.deviceIdentities.push({
+      deviceId: device.id,
+      organizationId,
+      credentialHash: 'mock-hash-' + randomUUID(),
+      status: 'ACTIVE',
+      activatedAt: now,
+      revokedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return {
+      status: 201,
+      body: { device: deviceView(db, device), activationCredential },
+      changed: true,
+    };
   }
   if (parts.length >= 2) {
     const device = find(db.devices, parts[1], organizationId);

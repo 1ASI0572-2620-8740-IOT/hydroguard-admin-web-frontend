@@ -9,6 +9,7 @@ import {
   DeviceDto,
   DeviceDetailDto,
   ConfigurationVersionsDto,
+  RegisteredDeviceDto,
 } from './configuration-api.dto';
 import { mapDevice, mapPage, mapVersion } from './configuration-api.mapper';
 @Injectable()
@@ -31,11 +32,14 @@ export class DeviceAxiosRepository implements DeviceRepository {
     };
   }
   async create(request: CreateDevice) {
-    const { data } = await apiClient.post<DeviceDto>('/v1/devices', {
+    const { data } = await apiClient.post<RegisteredDeviceDto>('/v1/devices', {
       ...request,
       capabilities: [...request.capabilities],
     });
-    return mapDevice(data);
+    return { device: mapDevice(data.device), activationCredential: data.activationCredential };
+  }
+  async revokeIdentity(id: string) {
+    await apiClient.post('/v1/device-identities/' + encodeURIComponent(id) + '/revoke');
   }
   async link(id: string, reservoirId: string) {
     await apiClient.post('/v1/devices/' + encodeURIComponent(id) + '/link', { reservoirId });

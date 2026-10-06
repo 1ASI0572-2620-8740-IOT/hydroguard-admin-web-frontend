@@ -4,7 +4,7 @@ import { handleDevices } from './devices.mjs';
 import { handleProfiles } from './profiles.mjs';
 
 export const isConfigurationPath = (path) =>
-  /^\/api\/v1\/(groups|reservoirs|devices|operator-profiles|assignments|operational-options|available-pairs|organizations)(\/|$)/.test(
+  /^\/api\/v1\/(groups|reservoirs|devices|device-identities|operator-profiles|assignments|operational-options|available-pairs|organizations)(\/|$)/.test(
     path,
   );
 

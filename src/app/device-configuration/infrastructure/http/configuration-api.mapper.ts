@@ -46,6 +46,7 @@ export const mapDevice = (dto: DeviceDto): Device => ({
   lastCommunicationAt: dto.lastCommunicationAt,
   configurationStatus: dto.configurationStatus,
   currentConfigurationVersion: dto.currentConfigurationVersion,
+  identityStatus: dto.identityStatus,
 });
 export const mapProfile = (dto: OperatorProfileDto): OperatorProfile => ({
   id: dto.id,

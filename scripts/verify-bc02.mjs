@@ -182,9 +182,14 @@ try {
       },
       201,
     );
-  const deviceA = await createDevice('BC02-DEVICE-A');
-  const deviceB = await createDevice('BC02-DEVICE-B');
-  const deviceC = await createDevice('BC02-DEVICE-C');
+  const registrationA = await createDevice('BC02-DEVICE-A');
+  const registrationB = await createDevice('BC02-DEVICE-B');
+  const registrationC = await createDevice('BC02-DEVICE-C');
+  const deviceA = registrationA.device;
+  const deviceB = registrationB.device;
+  const deviceC = registrationC.device;
+  assert.match(registrationA.activationCredential, /^hgdev_[a-f0-9]{32}$/);
+  assert.equal(deviceA.identityStatus, 'ACTIVE');
   assert.equal(deviceA.lifecycleStatus, 'ACTIVE_UNLINKED');
   assert.equal(deviceA.availability, 'UNKNOWN');
   await request(
@@ -226,7 +231,7 @@ try {
     { reservoirId: reservoirB.id },
     409,
   );
-  const unlinked = await createDevice('BC02-DEVICE-D');
+  const unlinked = (await createDevice('BC02-DEVICE-D')).device;
   await request(
     'POST',
     '/devices/' + unlinked.id + '/link',
@@ -234,6 +239,13 @@ try {
     { reservoirId: reservoirA.id },
     409,
   );
+  const revocable = (await createDevice('BC02-DEVICE-IDENTITY')).device;
+  await request('POST', '/device-identities/' + revocable.id + '/revoke', textile, {}, 204);
+  assert.equal(
+    (await request('GET', '/devices/' + revocable.id, textile)).device.identityStatus,
+    'REVOKED',
+  );
+  await request('POST', '/device-identities/' + revocable.id + '/revoke', textile, {}, 409);
   await request(
     'PATCH',
     '/reservoirs/' + reservoirA.id + '/status',

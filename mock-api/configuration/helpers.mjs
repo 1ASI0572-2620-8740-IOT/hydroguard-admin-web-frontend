@@ -129,6 +129,9 @@ export const deviceView = (db, device) => ({
   capabilities: device.capabilities ?? [],
   reservoirId: device.reservoirId ?? null,
   lastCommunicationAt: device.lastCommunicationAt ?? null,
+  identityStatus:
+    (db.deviceIdentities ?? []).find((identity) => identity.deviceId === device.id)?.status ??
+    'PENDING',
   ...configurationSummary(db, device.id),
 });
 export const assignmentView = (db, assignment) => ({

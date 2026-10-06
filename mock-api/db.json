@@ -255,6 +255,58 @@
       "lastCommunicationAt": "2026-09-20T10:00:00.000Z"
     }
   ],
+  "deviceIdentities": [
+    {
+      "deviceId": "dev-101",
+      "organizationId": "org-textile",
+      "credentialHash": "mock-hash-dev-101",
+      "status": "ACTIVE",
+      "activatedAt": "2026-09-01T08:05:00.000Z",
+      "revokedAt": null,
+      "createdAt": "2026-09-01T08:05:00.000Z",
+      "updatedAt": "2026-09-01T08:05:00.000Z"
+    },
+    {
+      "deviceId": "dev-102",
+      "organizationId": "org-textile",
+      "credentialHash": "mock-hash-dev-102",
+      "status": "ACTIVE",
+      "activatedAt": "2026-09-01T08:06:00.000Z",
+      "revokedAt": null,
+      "createdAt": "2026-09-01T08:06:00.000Z",
+      "updatedAt": "2026-09-01T08:06:00.000Z"
+    },
+    {
+      "deviceId": "dev-201",
+      "organizationId": "org-hydroponic",
+      "credentialHash": "mock-hash-dev-201",
+      "status": "ACTIVE",
+      "activatedAt": "2026-09-02T09:05:00.000Z",
+      "revokedAt": null,
+      "createdAt": "2026-09-02T09:05:00.000Z",
+      "updatedAt": "2026-09-02T09:05:00.000Z"
+    },
+    {
+      "deviceId": "dev-202",
+      "organizationId": "org-hydroponic",
+      "credentialHash": "mock-hash-dev-202",
+      "status": "REVOKED",
+      "activatedAt": "2026-09-02T09:06:00.000Z",
+      "revokedAt": "2026-09-27T10:30:00.000Z",
+      "createdAt": "2026-09-02T09:06:00.000Z",
+      "updatedAt": "2026-09-27T10:30:00.000Z"
+    },
+    {
+      "deviceId": "dev-203",
+      "organizationId": "org-textile",
+      "credentialHash": "mock-hash-dev-203",
+      "status": "ACTIVE",
+      "activatedAt": "2026-09-03T10:00:00.000Z",
+      "revokedAt": null,
+      "createdAt": "2026-09-03T10:00:00.000Z",
+      "updatedAt": "2026-09-03T10:00:00.000Z"
+    }
+  ],
   "operatorProfiles": [
     {
       "id": "prof-1",

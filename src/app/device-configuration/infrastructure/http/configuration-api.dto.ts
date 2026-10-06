@@ -6,6 +6,7 @@ import {
   DeviceCapability,
   DeviceLifecycleStatus,
   ConfigurationStatus,
+  DeviceIdentityStatus,
 } from '../../domain/models/device';
 import { OperatorProfileStatus } from '../../domain/models/operator-profile';
 export interface WorkGroupDto {
@@ -39,6 +40,11 @@ export interface DeviceDto {
   lastCommunicationAt: string | null;
   configurationStatus: ConfigurationStatus;
   currentConfigurationVersion: number | null;
+  identityStatus: DeviceIdentityStatus;
+}
+export interface RegisteredDeviceDto {
+  device: DeviceDto;
+  activationCredential: string;
 }
 export interface OperatorProfileDto {
   id: string;
