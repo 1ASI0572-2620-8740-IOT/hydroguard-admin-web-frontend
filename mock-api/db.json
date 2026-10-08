@@ -105,32 +105,6 @@
       "email": "jquispe@textilperu.com",
       "createdAt": "2026-08-20T11:00:00.000Z",
       "updatedAt": "2026-09-02T16:00:00.000Z"
-    },
-    {
-      "id": "usr-314d1b2f-a308-4d32-8545-265854438762",
-      "organizationId": "org-hydroponic",
-      "identifier": "juan.perez",
-      "username": "juan.perez",
-      "displayName": "Juan Perez Quispe",
-      "password": "juanperez123",
-      "role": "ROLE_OPERATOR",
-      "roles": ["ROLE_OPERATOR"],
-      "status": "ACTIVE",
-      "createdAt": "2026-09-29T20:29:47.750Z",
-      "updatedAt": "2026-09-29T20:29:47.750Z"
-    },
-    {
-      "id": "usr-eff7192e-2d79-416c-a196-835e344e3ed8",
-      "organizationId": "org-textile",
-      "identifier": "francisco.valencia",
-      "username": "francisco.valencia",
-      "displayName": "Francisco Valencia",
-      "password": "franciscovalencia123",
-      "role": "ROLE_OPERATOR",
-      "roles": ["ROLE_OPERATOR"],
-      "status": "ACTIVE",
-      "createdAt": "2026-09-30T04:55:38.334Z",
-      "updatedAt": "2026-09-30T04:55:38.334Z"
     }
   ],
   "groups": [
