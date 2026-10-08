@@ -27,6 +27,11 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'users' },
       {
+        path: 'telemetry',
+        loadChildren: () =>
+          import('./telemetry/presentation/routes').then((m) => m.TELEMETRY_ROUTES),
+      },
+      {
         path: '',
         loadChildren: () =>
           import('./device-configuration/presentation/routes').then((m) => m.CONFIGURATION_ROUTES),

@@ -501,7 +501,8 @@
       "deviceId": "dev-101",
       "ph": 7.2,
       "temperature": 24.6,
-      "measuredAt": "2026-10-03T11:44:00.000Z"
+      "measuredAt": "2026-10-03T11:44:00.000Z",
+      "source": "DEVICE"
     },
     {
       "id": "msr-tx-02",
@@ -509,7 +510,8 @@
       "deviceId": "dev-102",
       "ph": 9.1,
       "temperature": 31.8,
-      "measuredAt": "2026-10-03T11:40:00.000Z"
+      "measuredAt": "2026-10-03T11:40:00.000Z",
+      "source": "SIMULATOR"
     },
     {
       "id": "msr-tx-03",
@@ -517,7 +519,8 @@
       "deviceId": "dev-101",
       "ph": 8.9,
       "temperature": 28.1,
-      "measuredAt": "2026-10-02T15:10:00.000Z"
+      "measuredAt": "2026-10-02T15:10:00.000Z",
+      "source": "DEVICE"
     },
     {
       "id": "msr-hp-01",
@@ -525,7 +528,8 @@
       "deviceId": "dev-201",
       "ph": 6.1,
       "temperature": 23.4,
-      "measuredAt": "2026-10-03T11:25:00.000Z"
+      "measuredAt": "2026-10-03T11:25:00.000Z",
+      "source": "DEVICE"
     },
     {
       "id": "msr-hp-02",
@@ -533,7 +537,125 @@
       "deviceId": "dev-202",
       "ph": 5.2,
       "temperature": 27.9,
-      "measuredAt": "2026-10-01T09:20:00.000Z"
+      "measuredAt": "2026-10-01T09:20:00.000Z",
+      "source": "SIMULATOR"
+    },
+    {
+      "id": "wm-101-01",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "ph": 7.35,
+      "temperature": 23.8,
+      "measuredAt": "2026-10-04T18:28:45.000Z",
+      "source": "DEVICE"
+    },
+    {
+      "id": "wm-101-02",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "ph": 7.32,
+      "temperature": 23.6,
+      "measuredAt": "2026-10-04T18:25:00.000Z",
+      "source": "DEVICE"
+    },
+    {
+      "id": "wm-101-03",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "ph": 7.28,
+      "temperature": 23.4,
+      "measuredAt": "2026-10-04T18:20:00.000Z",
+      "source": "DEVICE"
+    },
+    {
+      "id": "wm-101-04",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "ph": 7.41,
+      "temperature": 23.5,
+      "measuredAt": "2026-10-04T18:15:00.000Z",
+      "source": "DEVICE"
+    },
+    {
+      "id": "wm-101-05",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "ph": 7.38,
+      "temperature": 23.2,
+      "measuredAt": "2026-10-04T18:10:00.000Z",
+      "source": "DEVICE"
+    },
+    {
+      "id": "wm-102-01",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "ph": 7.15,
+      "temperature": 22.9,
+      "measuredAt": "2026-10-04T18:27:10.000Z",
+      "source": "SIMULATOR"
+    },
+    {
+      "id": "wm-102-02",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "ph": 7.18,
+      "temperature": 22.7,
+      "measuredAt": "2026-10-04T18:22:00.000Z",
+      "source": "SIMULATOR"
+    },
+    {
+      "id": "wm-102-03",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "ph": 7.12,
+      "temperature": 22.8,
+      "measuredAt": "2026-10-04T18:17:00.000Z",
+      "source": "SIMULATOR"
+    },
+    {
+      "id": "wm-201-01",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "ph": 6.12,
+      "temperature": 21.4,
+      "measuredAt": "2026-10-04T18:14:00.000Z",
+      "source": "DEVICE"
+    },
+    {
+      "id": "wm-201-02",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "ph": 6.08,
+      "temperature": 21.2,
+      "measuredAt": "2026-10-04T18:09:00.000Z",
+      "source": "DEVICE"
+    },
+    {
+      "id": "wm-201-03",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "ph": 6.15,
+      "temperature": 21.5,
+      "measuredAt": "2026-10-04T18:04:00.000Z",
+      "source": "DEVICE"
+    },
+    {
+      "id": "wm-202-01",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "ph": 5.85,
+      "temperature": 25.1,
+      "measuredAt": "2026-10-01T10:04:30.000Z",
+      "source": "SIMULATOR"
+    },
+    {
+      "id": "wm-203-01",
+      "organizationId": "org-textile",
+      "deviceId": "dev-203",
+      "ph": 7.02,
+      "temperature": 21.8,
+      "measuredAt": "2026-09-20T09:58:00.000Z",
+      "source": "DEVICE"
     }
   ],
   "processes": [
