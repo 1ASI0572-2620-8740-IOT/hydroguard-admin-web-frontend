@@ -13,6 +13,7 @@ import {
 } from '@angular/router';
 import { provideDeviceConfiguration } from './device-configuration/configuration.providers';
 import { provideOperationalMonitoring } from './operational-monitoring/monitoring.providers';
+import { provideTelemetry } from './telemetry/telemetry.providers';
 import { apiClient, AppHttpError } from './core/http/api-client';
 import { AdminSessionStore } from './iam/application/state/admin-session.store';
 
@@ -35,6 +36,7 @@ export const appConfig: ApplicationConfig = {
     { provide: IamRepository, useClass: IamAxiosRepository },
     ...provideDeviceConfiguration(),
     ...provideOperationalMonitoring(),
+    ...provideTelemetry(),
     provideAppInitializer(() => {
       const session = inject(AdminSessionStore);
       const router = inject(Router);

@@ -117,6 +117,16 @@
           <mat-icon class="nav-icon">timeline</mat-icon>
           <span>Trazabilidad</span>
         </a>
+        <a
+          class="nav-item"
+          routerLink="/telemetry"
+          routerLinkActive="active-nav"
+          ariaCurrentWhenActive="page"
+          (click)="closeNavigation(drawer)"
+        >
+          <mat-icon class="nav-icon">sensors</mat-icon>
+          <span>Telemetría</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">
