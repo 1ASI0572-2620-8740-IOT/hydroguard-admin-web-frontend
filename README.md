@@ -4,7 +4,7 @@ Aplicación web multiempresa para la administración de identidades y accesos de
 
 El bounded context de configuración operativa (BC-02) permite administrar grupos, reservorios, dispositivos, vinculaciones exclusivas y perfiles de Operario con asignaciones e historial. La creación de una cuenta continúa hacia su perfil y código de primer acceso. La web también consulta borradores, versiones publicadas y compatibilidad de configuraciones, sin editarlas.
 
-La [guía de pruebas de BC-02](docs/guia-pruebas-bc02.md) describe el recorrido completo, los resultados esperados y el motivo de cada verificación.
+La [guía unificada de pruebas manuales](docs/guia-pruebas-manuales-integrales.md) describe, paso a paso, todos los flujos disponibles, sus variantes, resultados esperados y limitaciones actuales.
 
 ## Requisitos
 
