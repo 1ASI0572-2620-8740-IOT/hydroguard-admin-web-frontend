@@ -697,14 +697,14 @@ La guía principal es manual. Como comprobación adicional puede ejecutar:
 ```powershell
 npm run build
 npm run verify:bc02
+npm run verify:bc05
 ```
 
 Resultados esperados en la rama integrada actual:
 
 - Compilación correcta.
 - BC-02: 88 comprobaciones HTTP aprobadas, incluyendo Device Identity.
-
-Existe también `npm run verify:bc05`, pero su versión actual utiliza una fecha final fija anterior a los incidentes creados en días posteriores. Puede fallar al correlacionar un incidente nuevo aunque la interfaz y el mock funcionen correctamente. Hasta corregir ese script, valide BC-05 mediante las secciones 10.1 a 10.5 de esta guía.
+- BC-05: comprobaciones aprobadas para trazabilidad, incidencias, reportes y reglas de acceso.
 
 ## 16. Funciones que todavía no están implementadas
 

@@ -95,6 +95,7 @@ try {
     },
     201,
   );
+  const incidentDate = incident.createdAt.slice(0, 10);
   assert.equal(incident.status, 'OPEN');
   await request(
     'POST',
@@ -109,7 +110,7 @@ try {
   );
   const detail = await request(
     'GET',
-    '/monitoring/devices/dev-101/traceability?from=2026-09-26&to=2026-10-03',
+    `/monitoring/devices/dev-101/traceability?from=2026-09-26&to=${encodeURIComponent(incidentDate)}`,
     textile,
   );
   assert.ok(
@@ -121,7 +122,7 @@ try {
     'POST',
     '/monitoring/reports/generate',
     textile,
-    { deviceId: 'dev-101', from: '2026-09-26', to: '2026-10-03' },
+    { deviceId: 'dev-101', from: '2026-09-26', to: incidentDate },
     201,
   );
   assert.ok(report.measurements >= 2);
