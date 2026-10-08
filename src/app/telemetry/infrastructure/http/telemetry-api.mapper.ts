@@ -1,8 +1,11 @@
-import { mapDevice } from '../../../device-configuration/infrastructure/http/configuration-api.mapper';
-import { PageDto } from '../../../device-configuration/infrastructure/http/configuration-api.dto';
 import { DeviceTelemetrySummary, WaterMeasurement } from '../../domain/models/water-measurement';
 import { Page } from '../../domain/models/page';
-import { DeviceTelemetrySummaryDto, WaterMeasurementDto } from './telemetry-api.dto';
+import {
+  DeviceTelemetrySummaryDto,
+  PageDto,
+  TelemetryDeviceDto,
+  WaterMeasurementDto,
+} from './telemetry-api.dto';
 
 export const mapMeasurement = (dto: WaterMeasurementDto): WaterMeasurement => ({
   id: dto.id,
@@ -13,10 +16,20 @@ export const mapMeasurement = (dto: WaterMeasurementDto): WaterMeasurement => ({
   source: dto.source,
 });
 
+export const mapTelemetryDevice = (dto: TelemetryDeviceDto) => ({
+  id: dto.id,
+  serialNumber: dto.serialNumber,
+  alias: dto.alias,
+  deviceModel: dto.deviceModel,
+  operatingEnvironment: dto.operatingEnvironment,
+  availability: dto.availability,
+  reservoirName: dto.reservoirName,
+  lastCommunicationAt: dto.lastCommunicationAt,
+});
+
 export const mapDeviceSummary = (dto: DeviceTelemetrySummaryDto): DeviceTelemetrySummary => ({
-  device: mapDevice(dto.device),
+  device: mapTelemetryDevice(dto.device),
   latestMeasurement: dto.latestMeasurement ? mapMeasurement(dto.latestMeasurement) : null,
-  heartbeatIntervalSeconds: dto.heartbeatIntervalSeconds,
 });
 
 export const mapPage = <TInput, TOutput>(

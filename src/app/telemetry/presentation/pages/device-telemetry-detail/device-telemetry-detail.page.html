@@ -1,5 +1,5 @@
 <section class="page">
-  <div class="actions" style="margin-bottom: 8px;">
+  <div class="actions" style="margin-bottom: 8px">
     <a mat-button routerLink="/telemetry">
       <mat-icon>arrow_back</mat-icon>
       Volver a supervisión general
@@ -8,12 +8,12 @@
 
   <header class="page-header">
     <div>
-      @if (deviceDetail(); as detail) {
-        <h1>Telemetría de {{ detail.device.serialNumber }}</h1>
+      @if (summaryState.data(); as summary) {
+        <h1>Telemetría de {{ summary.device.serialNumber }}</h1>
         <p>
-          {{ detail.device.alias || detail.device.deviceModel }} ·
-          {{ detail.device.operatingEnvironment | telemetryLabel }} ·
-          Reservorio: {{ detail.reservoirName || 'Sin vincular' }}
+          {{ summary.device.alias || summary.device.deviceModel }} ·
+          {{ summary.device.operatingEnvironment | telemetryLabel }} · Reservorio:
+          {{ summary.device.reservoirName || 'Sin vincular' }}
         </p>
       } @else {
         <h1>Historial de Telemetría IoT</h1>
@@ -21,30 +21,35 @@
       }
     </div>
 
-    @if (deviceDetail(); as detail) {
+    @if (summaryState.data(); as summary) {
       <div class="actions">
         <span
           class="badge-status"
           [ngClass]="{
-            'badge-online': detail.device.availability === 'ONLINE',
-            'badge-delayed': detail.device.availability === 'DELAYED',
-            'badge-offline': detail.device.availability === 'OFFLINE',
-            'badge-unknown': detail.device.availability === 'UNKNOWN'
+            'badge-online': summary.device.availability === 'ONLINE',
+            'badge-delayed': summary.device.availability === 'DELAYED',
+            'badge-offline': summary.device.availability === 'OFFLINE',
+            'badge-unknown': summary.device.availability === 'UNKNOWN',
           }"
         >
           <span
             class="status-dot"
             [ngClass]="{
-              'dot-online': detail.device.availability === 'ONLINE',
-              'dot-delayed': detail.device.availability === 'DELAYED',
-              'dot-offline': detail.device.availability === 'OFFLINE',
-              'dot-unknown': detail.device.availability === 'UNKNOWN'
+              'dot-online': summary.device.availability === 'ONLINE',
+              'dot-delayed': summary.device.availability === 'DELAYED',
+              'dot-offline': summary.device.availability === 'OFFLINE',
+              'dot-unknown': summary.device.availability === 'UNKNOWN',
             }"
           ></span>
-          {{ detail.device.availability | telemetryLabel }}
+          {{ summary.device.availability | telemetryLabel }}
         </span>
 
-        <button mat-stroked-button type="button" (click)="reload()" [disabled]="measurementsState.loading()">
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="refresh()"
+          [disabled]="measurementsState.loading() || summaryState.loading()"
+        >
           <mat-icon>refresh</mat-icon>
           Actualizar
         </button>
@@ -57,15 +62,15 @@
     <div class="metric-box">
       <div class="metric-box-title">Último pH Reportado</div>
       <div class="metric-box-val">
-        @if (latestMeasurement(); as latest) {
+        @if (summaryState.data()?.latestMeasurement; as latest) {
           <span>{{ latest.ph | number: '1.2-2' }}</span>
           <span class="metric-box-unit">pH</span>
         } @else {
-          <span style="color: #94a3b8;">—</span>
+          <span style="color: #94a3b8">—</span>
         }
       </div>
-      <p style="font-size: 12px; margin: 4px 0 0; color: #64748b;">
-        @if (latestMeasurement(); as latest) {
+      <p style="font-size: 12px; margin: 4px 0 0; color: #64748b">
+        @if (summaryState.data()?.latestMeasurement; as latest) {
           Registrado: {{ latest.recordedAt | date: 'dd/MM/yyyy HH:mm:ss' }}
         } @else {
           Sin mediciones registradas
@@ -76,18 +81,18 @@
     <div class="metric-box">
       <div class="metric-box-title">Última Temperatura</div>
       <div class="metric-box-val">
-        @if (latestMeasurement(); as latest) {
+        @if (summaryState.data()?.latestMeasurement; as latest) {
           <span>{{ latest.temperature | number: '1.1-1' }}</span>
           <span class="metric-box-unit">°C</span>
         } @else {
-          <span style="color: #94a3b8;">—</span>
+          <span style="color: #94a3b8">—</span>
         }
       </div>
-      <p style="font-size: 12px; margin: 4px 0 0; color: #64748b;">
-        @if (latestMeasurement(); as latest) {
+      <p style="font-size: 12px; margin: 4px 0 0; color: #64748b">
+        @if (summaryState.data()?.latestMeasurement; as latest) {
           Fuente: {{ latest.source | telemetryLabel }}
         } @else {
-          Esperando trama
+          Sin mediciones registradas
         }
       </p>
     </div>
@@ -96,25 +101,24 @@
       <div class="metric-box-title">Total de Mediciones</div>
       <div class="metric-box-val">
         <span>{{ measurementsState.data()?.total ?? 0 }}</span>
-        <span class="metric-box-unit">paquetes</span>
+        <span class="metric-box-unit">mediciones</span>
       </div>
-      <p style="font-size: 12px; margin: 4px 0 0; color: #64748b;">
-        Historial validado en plataforma
+      <p style="font-size: 12px; margin: 4px 0 0; color: #64748b">
+        Historial disponible en plataforma
       </p>
     </div>
   </div>
 
   <hg-query-feedback
+    [loading]="summaryState.loading()"
+    [error]="summaryState.error()"
+    (retry)="refresh()"
+  />
+
+  <hg-query-feedback
     [loading]="measurementsState.loading()"
     [error]="measurementsState.error()"
     (retry)="reload()"
-  />
-
-  <hg-list-controls
-    [query]="query"
-    [total]="measurementsState.data()?.total ?? 0"
-    [loading]="measurementsState.loading()"
-    (changed)="change($event)"
   />
 
   <form [formGroup]="filters" class="grid" (submit)="$event.preventDefault()">
@@ -125,6 +129,14 @@
         <mat-option value="DEVICE">{{ 'DEVICE' | telemetryLabel }}</mat-option>
         <mat-option value="SIMULATOR">{{ 'SIMULATOR' | telemetryLabel }}</mat-option>
       </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Desde</mat-label>
+      <input matInput type="date" formControlName="from" (change)="filter()" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Hasta</mat-label>
+      <input matInput type="date" formControlName="to" (change)="filter()" />
     </mat-form-field>
   </form>
 
@@ -146,7 +158,9 @@
         </ng-container>
 
         <ng-container matColumnDef="ph">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header="ph">Potencial de Hidrógeno (pH)</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="ph">
+            Potencial de Hidrógeno (pH)
+          </th>
           <td mat-cell *matCellDef="let item">
             <span class="metric-pill">{{ item.ph | number: '1.2-2' }}</span>
           </td>
@@ -163,20 +177,10 @@
           <th mat-header-cell *matHeaderCellDef>Fuente de Lectura</th>
           <td mat-cell *matCellDef="let item">
             <span class="source-tag">
-              <mat-icon style="font-size: 14px; width: 14px; height: 14px;">
+              <mat-icon style="font-size: 14px; width: 14px; height: 14px">
                 {{ item.source === 'SIMULATOR' ? 'memory' : 'router' }}
               </mat-icon>
               {{ item.source | telemetryLabel }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="validation">
-          <th mat-header-cell *matHeaderCellDef>Validación</th>
-          <td mat-cell *matCellDef="let item">
-            <span class="badge-status badge-online">
-              <span class="status-dot dot-online"></span>
-              Trama Válida
             </span>
           </td>
         </ng-container>
@@ -189,5 +193,14 @@
         <p class="empty">No se registraron mediciones con los filtros indicados.</p>
       }
     </div>
+    <mat-paginator
+      [length]="result.total"
+      [pageIndex]="result.page - 1"
+      [pageSize]="result.pageSize"
+      [pageSizeOptions]="[5, 10, 25]"
+      [disabled]="measurementsState.loading()"
+      (page)="paginate($event)"
+      aria-label="Paginación del historial de mediciones"
+    />
   }
 </section>

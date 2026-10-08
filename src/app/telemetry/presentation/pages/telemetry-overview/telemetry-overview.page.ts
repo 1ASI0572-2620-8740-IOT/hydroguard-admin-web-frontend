@@ -7,8 +7,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ListDeviceSummariesUseCase } from '../../../application/use-cases/list-device-summaries.use-case';
@@ -16,10 +17,8 @@ import { DeviceTelemetrySummary } from '../../../domain/models/water-measurement
 import { ListQuery, Page } from '../../../domain/models/page';
 import { TelemetrySummaryQuery } from '../../../domain/ports/telemetry.repository';
 import { QueryState } from '../../../application/state/query-state';
-import { ListControlsComponent } from '../../../../device-configuration/presentation/components/list-controls/list-controls.component';
 import { QueryFeedbackComponent } from '../../../../device-configuration/presentation/components/query-feedback/query-feedback.component';
 import { TelemetryLabelPipe } from '../../state/labels';
-import { TelemetryDetailDialogComponent } from '../../components/telemetry-detail-dialog/telemetry-detail-dialog.component';
 
 @Component({
   selector: 'hg-telemetry-overview-page',
@@ -35,10 +34,10 @@ import { TelemetryDetailDialogComponent } from '../../components/telemetry-detai
     MatSortModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatInputModule,
+    MatPaginatorModule,
     MatIconModule,
-    MatDialogModule,
     MatTooltipModule,
-    ListControlsComponent,
     QueryFeedbackComponent,
     TelemetryLabelPipe,
   ],
@@ -47,7 +46,6 @@ import { TelemetryDetailDialogComponent } from '../../components/telemetry-detai
 })
 export class TelemetryOverviewPage implements OnInit {
   private readonly listSummaries = inject(ListDeviceSummariesUseCase);
-  private readonly dialog = inject(MatDialog);
 
   readonly state = new QueryState<Page<DeviceTelemetrySummary>>();
 
@@ -70,6 +68,7 @@ export class TelemetryOverviewPage implements OnInit {
   };
 
   readonly filters = inject(FormBuilder).nonNullable.group({
+    searchTerm: '',
     availability: '',
     operatingEnvironment: '',
   });
@@ -101,12 +100,7 @@ export class TelemetryOverviewPage implements OnInit {
     void this.reload();
   }
 
-  openDetailDialog(summary: DeviceTelemetrySummary): void {
-    this.dialog.open(TelemetryDetailDialogComponent, {
-      data: { summary },
-      width: '720px',
-      maxWidth: '95vw',
-      panelClass: 'telemetry-dialog-panel',
-    });
+  paginate(event: PageEvent): void {
+    this.change({ page: event.pageIndex + 1, pageSize: event.pageSize });
   }
 }

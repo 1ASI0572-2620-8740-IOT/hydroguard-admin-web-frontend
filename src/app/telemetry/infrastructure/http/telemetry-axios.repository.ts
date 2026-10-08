@@ -51,12 +51,20 @@ export class TelemetryAxiosRepository implements TelemetryRepository {
     signal?: AbortSignal,
   ): Promise<Page<DeviceTelemetrySummary>> {
     const { data } = await apiClient.get<PageDto<DeviceTelemetrySummaryDto>>(
-      '/v1/devices/telemetry-summaries',
+      '/v1/telemetry/devices',
       {
         params: queryParams(query ?? {}),
         signal,
       },
     );
     return mapPage(data, mapDeviceSummary);
+  }
+
+  async getDeviceSummary(deviceId: string, signal?: AbortSignal): Promise<DeviceTelemetrySummary> {
+    const { data } = await apiClient.get<DeviceTelemetrySummaryDto>(
+      `/v1/telemetry/devices/${encodeURIComponent(deviceId)}`,
+      { signal },
+    );
+    return mapDeviceSummary(data);
   }
 }

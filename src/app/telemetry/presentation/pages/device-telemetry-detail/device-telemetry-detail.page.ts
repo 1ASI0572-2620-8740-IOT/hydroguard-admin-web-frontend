@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -7,20 +7,19 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { ListMeasurementsUseCase } from '../../../application/use-cases/list-measurements.use-case';
-import { GetLatestMeasurementUseCase } from '../../../application/use-cases/get-latest-measurement.use-case';
-import { WaterMeasurement } from '../../../domain/models/water-measurement';
+import { GetDeviceSummaryUseCase } from '../../../application/use-cases/get-device-summary.use-case';
+import { DeviceTelemetrySummary, WaterMeasurement } from '../../../domain/models/water-measurement';
 import { MeasurementQuery } from '../../../domain/ports/telemetry.repository';
 import { ListQuery, Page } from '../../../domain/models/page';
 import { QueryState } from '../../../application/state/query-state';
-import { ListControlsComponent } from '../../../../device-configuration/presentation/components/list-controls/list-controls.component';
 import { QueryFeedbackComponent } from '../../../../device-configuration/presentation/components/query-feedback/query-feedback.component';
 import { TelemetryLabelPipe } from '../../state/labels';
-import { DeviceRepository } from '../../../../device-configuration/domain/ports/device.repository';
-import { DeviceDetail } from '../../../../device-configuration/domain/models/details';
 
 @Component({
   selector: 'hg-device-telemetry-detail-page',
@@ -36,9 +35,10 @@ import { DeviceDetail } from '../../../../device-configuration/domain/models/det
     MatSortModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatInputModule,
+    MatPaginatorModule,
     MatIconModule,
     MatProgressBarModule,
-    ListControlsComponent,
     QueryFeedbackComponent,
     TelemetryLabelPipe,
   ],
@@ -48,17 +48,14 @@ import { DeviceDetail } from '../../../../device-configuration/domain/models/det
 export class DeviceTelemetryDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly listMeasurements = inject(ListMeasurementsUseCase);
-  private readonly getLatest = inject(GetLatestMeasurementUseCase);
-  private readonly deviceRepository = inject(DeviceRepository);
+  private readonly getSummary = inject(GetDeviceSummaryUseCase);
 
   readonly deviceId = this.route.snapshot.paramMap.get('deviceId') ?? '';
 
   readonly measurementsState = new QueryState<Page<WaterMeasurement>>();
-  readonly deviceDetail = signal<DeviceDetail | null>(null);
-  readonly latestMeasurement = signal<WaterMeasurement | null>(null);
-  readonly loadingDevice = signal(false);
+  readonly summaryState = new QueryState<DeviceTelemetrySummary>();
 
-  readonly columns = ['recordedAt', 'ph', 'temperature', 'source', 'validation'];
+  readonly columns = ['recordedAt', 'ph', 'temperature', 'source'];
 
   query: MeasurementQuery = {
     page: 1,
@@ -69,29 +66,21 @@ export class DeviceTelemetryDetailPage implements OnInit {
 
   readonly filters = inject(FormBuilder).nonNullable.group({
     source: '',
+    from: '',
+    to: '',
   });
 
   ngOnInit(): void {
     if (this.deviceId) {
-      void this.loadDeviceInfo();
-      void this.reload();
+      void this.refresh();
     }
   }
 
-  async loadDeviceInfo(): Promise<void> {
-    this.loadingDevice.set(true);
-    try {
-      const [deviceData, latest] = await Promise.all([
-        this.deviceRepository.get(this.deviceId),
-        this.getLatest.execute(this.deviceId),
-      ]);
-      this.deviceDetail.set(deviceData);
-      this.latestMeasurement.set(latest);
-    } catch {
-      // Ignorar o registrar error no crítico
-    } finally {
-      this.loadingDevice.set(false);
-    }
+  refresh(): Promise<void[]> {
+    return Promise.all([
+      this.summaryState.load((signal) => this.getSummary.execute(this.deviceId, signal)),
+      this.reload(),
+    ]);
   }
 
   reload(): Promise<void> {
@@ -117,5 +106,9 @@ export class DeviceTelemetryDetailPage implements OnInit {
   filter(): void {
     this.query = { ...this.query, ...this.filters.getRawValue(), page: 1 };
     void this.reload();
+  }
+
+  paginate(event: PageEvent): void {
+    this.change({ page: event.pageIndex + 1, pageSize: event.pageSize });
   }
 }

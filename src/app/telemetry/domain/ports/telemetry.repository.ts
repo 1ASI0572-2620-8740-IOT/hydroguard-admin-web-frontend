@@ -28,4 +28,9 @@ export abstract class TelemetryRepository {
     query?: TelemetrySummaryQuery,
     signal?: AbortSignal,
   ): Promise<Page<DeviceTelemetrySummary>>;
+
+  abstract getDeviceSummary(
+    deviceId: string,
+    signal?: AbortSignal,
+  ): Promise<DeviceTelemetrySummary>;
 }

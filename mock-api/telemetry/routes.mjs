@@ -1,4 +1,33 @@
-import { find, page, scoped } from '../configuration/helpers.mjs';
+import { find, scoped } from '../configuration/helpers.mjs';
+
+const latestMeasurementFor = (db, organizationId, deviceId) =>
+  db.measurements
+    .filter(
+      (measurement) =>
+        measurement.deviceId === deviceId && measurement.organizationId === organizationId,
+    )
+    .sort((left, right) => Date.parse(right.measuredAt) - Date.parse(left.measuredAt))[0] ?? null;
+
+const telemetrySummary = (db, organizationId, device) => {
+  const latestMeasurement = latestMeasurementFor(db, organizationId, device.id);
+  const reservoir = db.reservoirs.find(
+    (item) => item.id === device.reservoirId && item.organizationId === organizationId,
+  );
+
+  return {
+    device: {
+      id: device.id,
+      serialNumber: device.serialNumber,
+      alias: device.alias ?? null,
+      deviceModel: device.deviceModel,
+      operatingEnvironment: device.operatingEnvironment,
+      availability: device.availability,
+      reservoirName: reservoir?.name ?? null,
+      lastCommunicationAt: device.lastCommunicationAt ?? latestMeasurement?.measuredAt ?? null,
+    },
+    latestMeasurement,
+  };
+};
 
 /**
  * Ruta de telemetría IoT (BC-03).
@@ -6,7 +35,6 @@ import { find, page, scoped } from '../configuration/helpers.mjs';
  */
 export const isTelemetryPath = (path) =>
   /^\/api\/v1\/devices\/[^/]+\/water-measurements(\/|$)/.test(path) ||
-  /^\/api\/v1\/devices\/telemetry-summaries(\/|$)/.test(path) ||
   /^\/api\/v1\/telemetry(\/|$)/.test(path);
 
 export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
@@ -16,14 +44,9 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
 
   const parts = url.pathname.slice('/api/v1/'.length).split('/').map(decodeURIComponent);
 
-  // 1. Resumen de telemetría por organización (Supervisión General)
-  // GET /api/v1/devices/telemetry-summaries
-  // NOTA: Endpoint agregado para la vista administrativa web; simula heartbeat y disponibilidad
-  // calculada a nivel de organización mientras el backend unifica esta consulta.
-  if (
-    (parts.join('/') === 'devices/telemetry-summaries' || parts.join('/') === 'telemetry/devices') &&
-    method === 'GET'
-  ) {
+  // 1. Resumen de telemetría por organización (supervisión administrativa).
+  // La disponibilidad es un dato informado; este mock no simula un reloj de heartbeat.
+  if (parts.join('/') === 'telemetry/devices' && method === 'GET') {
     let orgDevices = scoped(db.devices, organizationId).filter(
       (d) => d.lifecycleStatus !== 'INACTIVE',
     );
@@ -61,40 +84,7 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
     const start = (pageNumber - 1) * pageSize;
     const paginatedDevices = orgDevices.slice(start, start + pageSize);
 
-    // Mapear cada dispositivo con su última medición y regla de heartbeat
-    const items = paginatedDevices.map((device) => {
-      const measurements = db.measurements
-        .filter((m) => m.deviceId === device.id && m.organizationId === organizationId)
-        .sort((a, b) => Date.parse(b.measuredAt) - Date.parse(a.measuredAt));
-
-      const latestMeasurement = measurements[0] ?? null;
-
-      // SIMULACIÓN: Intervalo estándar de 60 segundos para heartbeat (según Bounded Context Canvas)
-      const heartbeatIntervalSeconds = 60;
-
-      return {
-        device: {
-          id: device.id,
-          serialNumber: device.serialNumber,
-          alias: device.alias,
-          deviceModel: device.deviceModel,
-          operatingEnvironment: device.operatingEnvironment,
-          capabilities: device.capabilities ?? [
-            'PH_SENSOR',
-            'TEMPERATURE_SENSOR',
-            'RELEASE_VALVE',
-          ],
-          lifecycleStatus: device.lifecycleStatus,
-          availability: device.availability,
-          reservoirId: device.reservoirId ?? null,
-          lastCommunicationAt: device.lastCommunicationAt ?? (latestMeasurement?.measuredAt ?? null),
-          configurationStatus: device.configurationStatus ?? 'COMPATIBLE',
-          currentConfigurationVersion: device.currentConfigurationVersion ?? 1,
-        },
-        latestMeasurement,
-        heartbeatIntervalSeconds,
-      };
-    });
+    const items = paginatedDevices.map((device) => telemetrySummary(db, organizationId, device));
 
     return {
       status: 200,
@@ -105,6 +95,20 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
         pageSize,
       },
     };
+  }
+
+  // GET /api/v1/telemetry/devices/:deviceId
+  if (
+    parts[0] === 'telemetry' &&
+    parts[1] === 'devices' &&
+    parts.length === 3 &&
+    method === 'GET'
+  ) {
+    const device = find(db.devices, parts[2], organizationId);
+    if (device.lifecycleStatus === 'INACTIVE') {
+      return { status: 404, body: { message: 'Dispositivo no encontrado.' } };
+    }
+    return { status: 200, body: telemetrySummary(db, organizationId, device) };
   }
 
   // 2. Rutas anidadas por dispositivo: /devices/:deviceId/water-measurements...
@@ -146,7 +150,7 @@ export const handleTelemetry = ({ method, url, body, db, organizationId }) => {
         measurements = measurements.filter((m) => Date.parse(m.measuredAt) >= fromTime);
       }
       if (to) {
-        const toTime = Date.parse(to);
+        const toTime = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(to) ? `${to}T23:59:59.999Z` : to);
         measurements = measurements.filter((m) => Date.parse(m.measuredAt) <= toTime);
       }
 

@@ -1,8 +1,3 @@
-import {
-  DeviceDto,
-  PageDto,
-} from '../../../device-configuration/infrastructure/http/configuration-api.dto';
-
 export interface WaterMeasurementDto {
   id: string;
   deviceId: string;
@@ -12,10 +7,25 @@ export interface WaterMeasurementDto {
   source: 'DEVICE' | 'SIMULATOR';
 }
 
-export interface DeviceTelemetrySummaryDto {
-  device: DeviceDto;
-  latestMeasurement: WaterMeasurementDto | null;
-  heartbeatIntervalSeconds: number;
+export interface TelemetryDeviceDto {
+  id: string;
+  serialNumber: string;
+  alias: string | null;
+  deviceModel: string;
+  operatingEnvironment: 'INTEGRAL_PRODUCT' | 'SIMULATION' | 'ACADEMIC_PROTOTYPE';
+  availability: 'ONLINE' | 'DELAYED' | 'OFFLINE' | 'UNKNOWN';
+  reservoirName: string | null;
+  lastCommunicationAt: string | null;
 }
 
-export type { PageDto };
+export interface DeviceTelemetrySummaryDto {
+  device: TelemetryDeviceDto;
+  latestMeasurement: WaterMeasurementDto | null;
+}
+
+export interface PageDto<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
