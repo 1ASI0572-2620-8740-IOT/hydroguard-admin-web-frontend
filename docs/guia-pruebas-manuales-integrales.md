@@ -84,11 +84,11 @@ El estado de la API debe responder `UP`. El puerto `3000` contiene la API y no l
 
 #### 2.3.1 Alternativa: probar el despliegue Vercel + Render
 
-Esta alternativa reemplaza las dos terminales locales por servicios publicados. Primero debe desplegarse el mock en Render usando `render.yaml` y después el frontend en Vercel usando `vercel.json`.
+Esta alternativa reemplaza las dos terminales locales por servicios publicados. Primero debe desplegarse en Render el repositorio independiente `mock-api` usando su `render.yaml` y después este frontend en Vercel usando `vercel.json`.
 
-1. En Render, cree un **Blueprint** conectado con este repositorio y confirme el servicio `hydroguard-academic-mock-api`.
-2. Espere a que `https://hydroguard-academic-mock-api.onrender.com/api/v1/health` responda `{"status":"UP"}`. Si Render asigna otro dominio, sustituya ese dominio en la primera regla de `vercel.json` antes de desplegar el frontend.
-3. En Vercel, importe el mismo repositorio, seleccione Angular y despliegue la rama que se desea probar. `vercel.json` ejecuta `npm run build`, publica `dist/hydroguard-admin-web-frontend/browser`, reenvía `/api/*` hacia Render y entrega `index.html` para las rutas del Router.
+1. En Render, cree un **Blueprint** conectado con el repositorio `mock-api` y confirme el servicio `hydroguard-mock-api-8740`.
+2. Espere a que `https://hydroguard-mock-api-8740.onrender.com/api/v1/health` responda `{"status":"UP"}`. Si Render asigna otro dominio, sustituya ese dominio en la primera regla de `vercel.json` antes de desplegar el frontend.
+3. En Vercel, importe el repositorio `hydroguard-admin-web-frontend`, seleccione Angular y despliegue la rama que se desea probar. `vercel.json` ejecuta `npm run build`, publica `dist/hydroguard-admin-web-frontend/browser`, reenvía `/api/*` hacia Render y entrega `index.html` para las rutas del Router.
 4. Abra la URL asignada por Vercel. No utilice directamente la URL de Render como interfaz: Render expone solamente la API.
 5. Compruebe `<URL_VERCEL>/api/v1/health` y luego abra `<URL_VERCEL>/login`.
 6. Inicie sesión y actualice el navegador en `/users`, `/treatments` y `/monitoring/incidents`. Cada ruta debe volver a mostrar la misma pantalla y nunca un `404` de Vercel.

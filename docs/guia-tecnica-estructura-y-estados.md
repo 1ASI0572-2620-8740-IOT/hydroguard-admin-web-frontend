@@ -28,7 +28,6 @@ El dominio no importa Angular, Axios ni archivos del mock. Los componentes no ll
 | `package-lock.json` | Resolución exacta de dependencias. Debe conservarse en Git.                                   |
 | `proxy.conf.json`   | En desarrollo reenvía `/api` hacia `127.0.0.1:3000`.                                          |
 | `vercel.json`       | Compila y publica Angular, reenvía `/api` a Render y configura el fallback SPA.               |
-| `render.yaml`       | Blueprint del Web Service que ejecuta la API mock.                                            |
 | `tsconfig.json`     | Opciones TypeScript compartidas.                                                              |
 | `tsconfig.app.json` | Opciones TypeScript específicas de la aplicación.                                             |
 | `.gitignore`        | Excluye dependencias, caché, compilados, archivos temporales e IDE.                           |
@@ -290,7 +289,7 @@ Las colecciones paginadas comparten normalmente:
 - `treatment/routes.mjs`: listado y detalle de procesos.
 - `monitoring/routes.mjs`: resumen, alertas, incidentes, trazabilidad y reporte.
 
-`PORT` lo asigna Render o utiliza `3000`. `HOST` utiliza `127.0.0.1` localmente y `0.0.0.0` en Render. `MOCK_DB_PATH` permite probar sobre una copia descartable sin alterar la semilla.
+`PORT` lo asigna Render o utiliza `3000`. `HOST` utiliza `127.0.0.1` localmente y `0.0.0.0` en Render. `MOCK_DB_PATH` permite probar sobre una copia descartable sin alterar la semilla. El despliegue remoto utiliza el `render.yaml` del repositorio independiente `mock-api`; la copia incluida aquí se conserva temporalmente para las pruebas locales existentes.
 
 Las escrituras se serializan mediante `requestQueue` para evitar que dos solicitudes modifiquen simultáneamente el archivo. Esto ayuda al mock, pero no sustituye transacciones ni una base de datos productiva.
 

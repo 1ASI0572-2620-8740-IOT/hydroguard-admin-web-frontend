@@ -230,7 +230,7 @@ En el frontend estas dependencias son de información, no importaciones entre ad
 ## 9. Despliegue académico
 
 - **Vercel:** compila Angular y publica `dist/hydroguard-admin-web-frontend/browser`.
-- **Render:** ejecuta `npm run mock:api` usando el Blueprint `render.yaml`.
+- **Render:** ejecuta `npm run mock:api` usando el Blueprint `render.yaml` del repositorio independiente `mock-api`.
 - **Proxy:** Vercel reenvía `/api/*` hacia Render para mantener el mismo contrato relativo utilizado localmente.
 - **Persistencia:** el plan gratuito de Render utiliza almacenamiento efímero; un reinicio restaura la semilla incluida en el despliegue.
 
