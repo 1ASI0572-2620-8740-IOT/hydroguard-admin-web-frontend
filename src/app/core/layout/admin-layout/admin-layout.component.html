@@ -127,6 +127,16 @@
           <mat-icon class="nav-icon">sensors</mat-icon>
           <span>Telemetría</span>
         </a>
+        <a
+          class="nav-item"
+          routerLink="/treatments"
+          routerLinkActive="active-nav"
+          ariaCurrentWhenActive="page"
+          (click)="closeNavigation(drawer)"
+        >
+          <mat-icon class="nav-icon">science</mat-icon>
+          <span>Tratamientos</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">

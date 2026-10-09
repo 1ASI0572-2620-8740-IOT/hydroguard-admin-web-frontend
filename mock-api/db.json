@@ -901,5 +901,424 @@
       "createdAt": "2026-10-01T10:05:10.000Z"
     }
   ],
+  "treatmentProcesses": [
+    {
+      "id": "trt-tx-ready",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "deviceSerialNumber": "ESP32-HG-TX-001",
+      "reservoirName": "Poza de Acondicionamiento #1",
+      "operatorName": "Marcelino Valencia",
+      "configurationVersion": 1,
+      "state": "READY",
+      "strategy": "Corrección manual de pH",
+      "approvalStatus": "APPROVED",
+      "currentCycle": 1,
+      "maximumCycles": 3,
+      "releaseMode": "MANUAL",
+      "releaseEligibility": "PENDING_CONFIRMATION",
+      "phMin": 6.5,
+      "phMax": 8.5,
+      "temperatureMin": 18,
+      "temperatureMax": 30,
+      "waitingMinutes": 15,
+      "initialMeasurement": {
+        "ph": 8.9,
+        "temperature": 28.1,
+        "measuredAt": "2026-10-02T15:10:00.000Z",
+        "conforming": false
+      },
+      "latestMeasurement": {
+        "ph": 7.2,
+        "temperature": 24.6,
+        "measuredAt": "2026-10-02T15:40:00.000Z",
+        "conforming": true
+      },
+      "cycles": [
+        {
+          "number": 1,
+          "action": "Aplicar corrector de pH durante 30 segundos",
+          "status": "CONFIRMED",
+          "startedAt": "2026-10-02T15:16:00.000Z",
+          "confirmedAt": "2026-10-02T15:17:00.000Z",
+          "result": "Actuación representada y reevaluación conforme."
+        }
+      ],
+      "events": [
+        {
+          "id": "tev-tx-ready-1",
+          "title": "Agua no conforme",
+          "description": "El pH superó el rango configurado.",
+          "outcome": "WARNING",
+          "occurredAt": "2026-10-02T15:10:00.000Z"
+        },
+        {
+          "id": "tev-tx-ready-2",
+          "title": "Estrategia aprobada",
+          "description": "El Operario aprobó la corrección una sola vez.",
+          "outcome": "INFO",
+          "occurredAt": "2026-10-02T15:15:00.000Z"
+        },
+        {
+          "id": "tev-tx-ready-3",
+          "title": "Agua conforme",
+          "description": "La reevaluación quedó dentro de los rangos.",
+          "outcome": "SUCCESS",
+          "occurredAt": "2026-10-02T15:40:00.000Z"
+        }
+      ],
+      "failureReason": null,
+      "emergencyReason": null,
+      "startedAt": "2026-10-02T15:10:00.000Z",
+      "updatedAt": "2026-10-02T15:40:00.000Z",
+      "completedAt": null
+    },
+    {
+      "id": "trt-tx-correcting",
+      "organizationId": "org-textile",
+      "deviceId": "dev-102",
+      "deviceSerialNumber": "ESP32-HG-TX-002",
+      "reservoirName": "Poza de Acondicionamiento #2",
+      "operatorName": "Marcelino Valencia",
+      "configurationVersion": 1,
+      "state": "CORRECTING",
+      "strategy": "Reducir pH y temperatura",
+      "approvalStatus": "APPROVED",
+      "currentCycle": 1,
+      "maximumCycles": 3,
+      "releaseMode": "AUTOMATIC",
+      "releaseEligibility": "NOT_ELIGIBLE",
+      "phMin": 6.5,
+      "phMax": 8.5,
+      "temperatureMin": 18,
+      "temperatureMax": 30,
+      "waitingMinutes": 15,
+      "initialMeasurement": {
+        "ph": 9.1,
+        "temperature": 31.8,
+        "measuredAt": "2026-10-03T11:40:00.000Z",
+        "conforming": false
+      },
+      "latestMeasurement": {
+        "ph": 9.1,
+        "temperature": 31.8,
+        "measuredAt": "2026-10-03T11:40:00.000Z",
+        "conforming": false
+      },
+      "cycles": [
+        {
+          "number": 1,
+          "action": "Activar representación de corrección",
+          "status": "EXECUTING",
+          "startedAt": "2026-10-03T11:42:00.000Z",
+          "confirmedAt": null,
+          "result": "Esperando confirmación técnica del simulador."
+        }
+      ],
+      "events": [
+        {
+          "id": "tev-tx-correcting-1",
+          "title": "Parámetros fuera de rango",
+          "description": "pH y temperatura requieren corrección.",
+          "outcome": "WARNING",
+          "occurredAt": "2026-10-03T11:40:00.000Z"
+        },
+        {
+          "id": "tev-tx-correcting-2",
+          "title": "Corrección iniciada",
+          "description": "La estrategia aprobada fue enviada al simulador.",
+          "outcome": "INFO",
+          "occurredAt": "2026-10-03T11:42:00.000Z"
+        }
+      ],
+      "failureReason": null,
+      "emergencyReason": null,
+      "startedAt": "2026-10-03T11:40:00.000Z",
+      "updatedAt": "2026-10-03T11:42:00.000Z",
+      "completedAt": null
+    },
+    {
+      "id": "trt-tx-released",
+      "organizationId": "org-textile",
+      "deviceId": "dev-101",
+      "deviceSerialNumber": "ESP32-HG-TX-001",
+      "reservoirName": "Poza de Acondicionamiento #1",
+      "operatorName": "Marcelino Valencia",
+      "configurationVersion": 1,
+      "state": "COMPLETED",
+      "strategy": null,
+      "approvalStatus": "NOT_REQUIRED",
+      "currentCycle": 0,
+      "maximumCycles": 3,
+      "releaseMode": "AUTOMATIC",
+      "releaseEligibility": "AUTHORIZED",
+      "phMin": 6.5,
+      "phMax": 8.5,
+      "temperatureMin": 18,
+      "temperatureMax": 30,
+      "waitingMinutes": 15,
+      "initialMeasurement": {
+        "ph": 7.35,
+        "temperature": 23.8,
+        "measuredAt": "2026-10-04T18:28:45.000Z",
+        "conforming": true
+      },
+      "latestMeasurement": {
+        "ph": 7.35,
+        "temperature": 23.8,
+        "measuredAt": "2026-10-04T18:28:45.000Z",
+        "conforming": true
+      },
+      "cycles": [],
+      "events": [
+        {
+          "id": "tev-tx-released-1",
+          "title": "Agua conforme",
+          "description": "La medición inicial cumplió la configuración vigente.",
+          "outcome": "SUCCESS",
+          "occurredAt": "2026-10-04T18:28:45.000Z"
+        },
+        {
+          "id": "tev-tx-released-2",
+          "title": "Liberación automática autorizada",
+          "description": "El proceso finalizó sin correcciones.",
+          "outcome": "SUCCESS",
+          "occurredAt": "2026-10-04T18:29:00.000Z"
+        }
+      ],
+      "failureReason": null,
+      "emergencyReason": null,
+      "startedAt": "2026-10-04T18:28:45.000Z",
+      "updatedAt": "2026-10-04T18:29:00.000Z",
+      "completedAt": "2026-10-04T18:29:00.000Z"
+    },
+    {
+      "id": "trt-hp-pending-approval",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "deviceSerialNumber": "ESP32-HG-HP-002",
+      "reservoirName": "Tanque Nutritivo Berros NFT-B",
+      "operatorName": "Carlos Mendoza",
+      "configurationVersion": 1,
+      "state": "PENDING_CORRECTION_APPROVAL",
+      "strategy": "Ajuste de temperatura",
+      "approvalStatus": "PENDING",
+      "currentCycle": 0,
+      "maximumCycles": 2,
+      "releaseMode": "MANUAL",
+      "releaseEligibility": "NOT_ELIGIBLE",
+      "phMin": 5.5,
+      "phMax": 6.5,
+      "temperatureMin": 18,
+      "temperatureMax": 25,
+      "waitingMinutes": 10,
+      "initialMeasurement": {
+        "ph": 6.1,
+        "temperature": 27.4,
+        "measuredAt": "2026-10-04T19:00:00.000Z",
+        "conforming": false
+      },
+      "latestMeasurement": {
+        "ph": 6.1,
+        "temperature": 27.4,
+        "measuredAt": "2026-10-04T19:00:00.000Z",
+        "conforming": false
+      },
+      "cycles": [],
+      "events": [
+        {
+          "id": "tev-hp-pending-1",
+          "title": "Estrategia propuesta",
+          "description": "Treatment seleccionó la estrategia y espera una única aprobación del Operario.",
+          "outcome": "WARNING",
+          "occurredAt": "2026-10-04T19:00:05.000Z"
+        }
+      ],
+      "failureReason": null,
+      "emergencyReason": null,
+      "startedAt": "2026-10-04T19:00:00.000Z",
+      "updatedAt": "2026-10-04T19:00:05.000Z",
+      "completedAt": null
+    },
+    {
+      "id": "trt-hp-waiting",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-201",
+      "deviceSerialNumber": "ESP32-HG-HP-001",
+      "reservoirName": "Tanque Nutritivo Lechuga NFT-A",
+      "operatorName": "Lucía Paredes",
+      "configurationVersion": 1,
+      "state": "WAITING",
+      "strategy": "Ajuste de pH nutritivo",
+      "approvalStatus": "APPROVED",
+      "currentCycle": 1,
+      "maximumCycles": 2,
+      "releaseMode": "MANUAL",
+      "releaseEligibility": "NOT_ELIGIBLE",
+      "phMin": 5.5,
+      "phMax": 6.5,
+      "temperatureMin": 18,
+      "temperatureMax": 25,
+      "waitingMinutes": 10,
+      "initialMeasurement": {
+        "ph": 5.2,
+        "temperature": 23.4,
+        "measuredAt": "2026-10-03T11:25:00.000Z",
+        "conforming": false
+      },
+      "latestMeasurement": {
+        "ph": 5.2,
+        "temperature": 23.4,
+        "measuredAt": "2026-10-03T11:25:00.000Z",
+        "conforming": false
+      },
+      "cycles": [
+        {
+          "number": 1,
+          "action": "Incrementar pH de solución nutritiva",
+          "status": "CONFIRMED",
+          "startedAt": "2026-10-03T11:27:00.000Z",
+          "confirmedAt": "2026-10-03T11:28:00.000Z",
+          "result": "Esperando nueva medición."
+        }
+      ],
+      "events": [
+        {
+          "id": "tev-hp-waiting-1",
+          "title": "Actuación confirmada",
+          "description": "Comenzó el tiempo de espera previo a reevaluar.",
+          "outcome": "INFO",
+          "occurredAt": "2026-10-03T11:28:00.000Z"
+        }
+      ],
+      "failureReason": null,
+      "emergencyReason": null,
+      "startedAt": "2026-10-03T11:25:00.000Z",
+      "updatedAt": "2026-10-03T11:28:00.000Z",
+      "completedAt": null
+    },
+    {
+      "id": "trt-hp-failure",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "deviceSerialNumber": "ESP32-HG-HP-002",
+      "reservoirName": "Tanque Nutritivo Berros NFT-B",
+      "operatorName": "Carlos Mendoza",
+      "configurationVersion": 1,
+      "state": "FAILED",
+      "strategy": "Ajuste de pH nutritivo",
+      "approvalStatus": "APPROVED",
+      "currentCycle": 2,
+      "maximumCycles": 2,
+      "releaseMode": "MANUAL",
+      "releaseEligibility": "NOT_ELIGIBLE",
+      "phMin": 5.5,
+      "phMax": 6.5,
+      "temperatureMin": 18,
+      "temperatureMax": 25,
+      "waitingMinutes": 10,
+      "initialMeasurement": {
+        "ph": 5.2,
+        "temperature": 27.9,
+        "measuredAt": "2026-10-01T09:20:00.000Z",
+        "conforming": false
+      },
+      "latestMeasurement": {
+        "ph": 5.3,
+        "temperature": 27.2,
+        "measuredAt": "2026-10-01T10:04:30.000Z",
+        "conforming": false
+      },
+      "cycles": [
+        {
+          "number": 1,
+          "action": "Ajustar pH",
+          "status": "CONFIRMED",
+          "startedAt": "2026-10-01T09:30:00.000Z",
+          "confirmedAt": "2026-10-01T09:31:00.000Z",
+          "result": "Continuó fuera de rango."
+        },
+        {
+          "number": 2,
+          "action": "Repetir ajuste de pH",
+          "status": "FAILED",
+          "startedAt": "2026-10-01T09:50:00.000Z",
+          "confirmedAt": null,
+          "result": "Se perdió el monitoreo antes de confirmar."
+        }
+      ],
+      "events": [
+        {
+          "id": "tev-hp-failure-1",
+          "title": "Límite operativo alcanzado",
+          "description": "El proceso no puede ordenar otro ciclo.",
+          "outcome": "FAILURE",
+          "occurredAt": "2026-10-01T10:05:00.000Z"
+        }
+      ],
+      "failureReason": "Pérdida de monitoreo durante el último ciclo.",
+      "emergencyReason": null,
+      "startedAt": "2026-10-01T09:20:00.000Z",
+      "updatedAt": "2026-10-01T10:05:00.000Z",
+      "completedAt": null
+    },
+    {
+      "id": "trt-hp-emergency",
+      "organizationId": "org-hydroponic",
+      "deviceId": "dev-202",
+      "deviceSerialNumber": "ESP32-HG-HP-002",
+      "reservoirName": "Tanque Nutritivo Berros NFT-B",
+      "operatorName": "Carlos Mendoza",
+      "configurationVersion": 1,
+      "state": "EMERGENCY",
+      "strategy": "Ajuste de temperatura",
+      "approvalStatus": "APPROVED",
+      "currentCycle": 1,
+      "maximumCycles": 2,
+      "releaseMode": "MANUAL",
+      "releaseEligibility": "NOT_ELIGIBLE",
+      "phMin": 5.5,
+      "phMax": 6.5,
+      "temperatureMin": 18,
+      "temperatureMax": 25,
+      "waitingMinutes": 10,
+      "initialMeasurement": {
+        "ph": 6.0,
+        "temperature": 28.5,
+        "measuredAt": "2026-09-30T16:00:00.000Z",
+        "conforming": false
+      },
+      "latestMeasurement": {
+        "ph": 6.0,
+        "temperature": 28.5,
+        "measuredAt": "2026-09-30T16:00:00.000Z",
+        "conforming": false
+      },
+      "cycles": [
+        {
+          "number": 1,
+          "action": "Reducir temperatura",
+          "status": "FAILED",
+          "startedAt": "2026-09-30T16:03:00.000Z",
+          "confirmedAt": null,
+          "result": "Interrumpida por parada de emergencia."
+        }
+      ],
+      "events": [
+        {
+          "id": "tev-hp-emergency-1",
+          "title": "Parada de emergencia",
+          "description": "El Operario detuvo el proceso y la válvula quedó cerrada.",
+          "outcome": "FAILURE",
+          "occurredAt": "2026-09-30T16:04:00.000Z"
+        }
+      ],
+      "failureReason": null,
+      "emergencyReason": "Parada solicitada manualmente por el Operario.",
+      "startedAt": "2026-09-30T16:00:00.000Z",
+      "updatedAt": "2026-09-30T16:04:00.000Z",
+      "completedAt": null
+    }
+  ],
   "reports": []
 }

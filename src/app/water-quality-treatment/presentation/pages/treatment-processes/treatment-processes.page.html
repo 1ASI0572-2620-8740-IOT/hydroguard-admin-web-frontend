@@ -1,0 +1,125 @@
+<section class="treatment-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Water Quality Treatment & Release</p>
+      <h1>Procesos de tratamiento</h1>
+      <p>
+        Supervise decisiones, ciclos y liberaciones sin ejecutar acciones reservadas al Operario.
+      </p>
+    </div>
+    <button mat-stroked-button type="button" (click)="reload()" [disabled]="state.loading()">
+      <mat-icon>refresh</mat-icon> Actualizar
+    </button>
+  </header>
+
+  <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar</mat-label>
+      <input
+        matInput
+        formControlName="searchTerm"
+        placeholder="Dispositivo, reservorio u operario"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="">Todos</mat-option>
+        <mat-option value="NOT_STARTED">Sin iniciar</mat-option>
+        <mat-option value="MEASURING">Midiendo</mat-option>
+        <mat-option value="EVALUATING">Evaluando</mat-option>
+        <mat-option value="PENDING_CORRECTION_APPROVAL">Pendiente de aprobación</mat-option>
+        <mat-option value="CORRECTING">Corrigiendo</mat-option>
+        <mat-option value="WAITING">Esperando</mat-option>
+        <mat-option value="REEVALUATING">Reevaluando</mat-option>
+        <mat-option value="READY">Listo para liberar</mat-option>
+        <mat-option value="RELEASING">Liberando</mat-option>
+        <mat-option value="FAILED">Fallo</mat-option>
+        <mat-option value="EMERGENCY">Emergencia</mat-option>
+        <mat-option value="COMPLETED">Finalizado</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button type="submit">Aplicar filtros</button>
+  </form>
+
+  @if (state.loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  @if (state.error()) {
+    <div class="feedback error" role="alert">
+      <span>{{ state.error() }}</span
+      ><button mat-button (click)="reload()">Reintentar</button>
+    </div>
+  }
+  @if (state.data(); as result) {
+    <div class="table-scroll">
+      <table class="treatment-table">
+        <thead>
+          <tr>
+            <th>Dispositivo</th>
+            <th>Estado</th>
+            <th>Medición</th>
+            <th>Estrategia</th>
+            <th>Ciclo</th>
+            <th>Liberación</th>
+            <th>Actualizado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (process of result.items; track process.id) {
+            <tr>
+              <td>
+                <strong>{{ process.deviceSerialNumber }}</strong
+                ><span
+                  >{{ process.reservoirName }} ·
+                  {{ process.operatorName || 'Sin responsable' }}</span
+                >
+              </td>
+              <td>
+                <span class="status {{ process.state.toLowerCase() }}">{{
+                  process.state | treatmentLabel
+                }}</span>
+              </td>
+              <td>
+                pH {{ process.latestMeasurement.ph | number: '1.1-2'
+                }}<span>{{ process.latestMeasurement.temperature | number: '1.1-1' }} °C</span>
+              </td>
+              <td>
+                {{ process.strategy || 'Sin corrección'
+                }}<span>Aprobación: {{ process.approvalStatus | treatmentLabel }}</span>
+              </td>
+              <td>{{ process.currentCycle }} / {{ process.maximumCycles }}</td>
+              <td>
+                {{ process.releaseEligibility | treatmentLabel
+                }}<span>{{ process.releaseMode | treatmentLabel }}</span>
+              </td>
+              <td>{{ process.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <a mat-stroked-button [routerLink]="['/treatments', process.id]">Ver detalle</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (!result.items.length) {
+        <div class="empty">
+          <mat-icon>science</mat-icon>
+          <p>No existen procesos para los filtros seleccionados.</p>
+        </div>
+      }
+    </div>
+    <footer class="pagination">
+      <span>{{ result.total }} proceso(s)</span
+      ><button mat-button [disabled]="result.page <= 1" (click)="changePage(-1)">Anterior</button
+      ><strong>Página {{ result.page }}</strong
+      ><button
+        mat-button
+        [disabled]="result.page * result.pageSize >= result.total"
+        (click)="changePage(1)"
+      >
+        Siguiente
+      </button>
+    </footer>
+  }
+</section>

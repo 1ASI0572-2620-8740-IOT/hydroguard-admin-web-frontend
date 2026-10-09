@@ -1,0 +1,141 @@
+<section class="treatment-page">
+  <a mat-button routerLink="/treatments"><mat-icon>arrow_back</mat-icon> Volver a procesos</a>
+  @if (state.loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  @if (state.error()) {
+    <div class="feedback error" role="alert">
+      <span>{{ state.error() }}</span
+      ><button mat-button (click)="load()">Reintentar</button>
+    </div>
+  }
+  @if (state.data(); as process) {
+    <header class="page-heading">
+      <div>
+        <p class="eyebrow">Proceso {{ process.id }}</p>
+        <h1>{{ process.deviceSerialNumber }}</h1>
+        <p>{{ process.reservoirName }} · {{ process.operatorName || 'Sin responsable' }}</p>
+      </div>
+      <span class="status large {{ process.state.toLowerCase() }}">{{
+        process.state | treatmentLabel
+      }}</span>
+    </header>
+
+    <div class="summary-grid">
+      <article>
+        <span>Medición actual</span
+        ><strong>pH {{ process.latestMeasurement.ph | number: '1.1-2' }}</strong
+        ><small
+          >{{ process.latestMeasurement.temperature | number: '1.1-1' }} °C ·
+          {{ process.latestMeasurement.measuredAt | date: 'dd/MM/yyyy HH:mm' }}</small
+        >
+      </article>
+      <article>
+        <span>Estrategia</span><strong>{{ process.strategy || 'Sin corrección' }}</strong
+        ><small>Aprobación {{ process.approvalStatus | treatmentLabel }}</small>
+      </article>
+      <article>
+        <span>Ciclo</span><strong>{{ process.currentCycle }} de {{ process.maximumCycles }}</strong
+        ><small>Espera configurada: {{ process.waitingMinutes }} min</small>
+      </article>
+      <article>
+        <span>Liberación</span><strong>{{ process.releaseEligibility | treatmentLabel }}</strong
+        ><small>Modo {{ process.releaseMode | treatmentLabel }}</small>
+      </article>
+    </div>
+
+    <article class="panel">
+      <header>
+        <h2>Configuración y evaluación inicial</h2>
+        <span>Versión {{ process.configurationVersion }}</span>
+      </header>
+      <div class="detail-grid">
+        <p>
+          <span>Rango de pH</span><strong>{{ process.phMin }} – {{ process.phMax }}</strong>
+        </p>
+        <p>
+          <span>Rango de temperatura</span
+          ><strong>{{ process.temperatureMin }} – {{ process.temperatureMax }} °C</strong>
+        </p>
+        <p>
+          <span>Medición inicial</span
+          ><strong
+            >pH {{ process.initialMeasurement.ph }} ·
+            {{ process.initialMeasurement.temperature }} °C</strong
+          >
+        </p>
+        <p>
+          <span>Resultado inicial</span
+          ><strong>{{ process.initialMeasurement.conforming ? 'Conforme' : 'No conforme' }}</strong>
+        </p>
+      </div>
+      @if (process.failureReason) {
+        <p class="reason failure"><strong>Motivo del fallo:</strong> {{ process.failureReason }}</p>
+      }
+      @if (process.emergencyReason) {
+        <p class="reason emergency">
+          <strong>Motivo de emergencia:</strong> {{ process.emergencyReason }}
+        </p>
+      }
+    </article>
+
+    <article class="panel">
+      <header>
+        <h2>Ciclos correctivos</h2>
+        <span>{{ process.cycles.length }} registrado(s)</span>
+      </header>
+      @if (process.cycles.length) {
+        <div class="cycle-list">
+          @for (cycle of process.cycles; track cycle.number) {
+            <section>
+              <span class="cycle-number">{{ cycle.number }}</span>
+              <div>
+                <h3>{{ cycle.action }}</h3>
+                <p>{{ cycle.result }}</p>
+                <small
+                  >{{ cycle.startedAt | date: 'dd/MM/yyyy HH:mm' }} ·
+                  {{ cycle.status | treatmentLabel }}</small
+                >
+              </div>
+            </section>
+          }
+        </div>
+      } @else {
+        <p class="empty">El proceso no necesitó una acción correctiva.</p>
+      }
+    </article>
+
+    <article class="panel">
+      <header>
+        <h2>Decisiones del proceso</h2>
+        <span>Solo lectura</span>
+      </header>
+      <div class="event-list">
+        @for (event of process.events; track event.id) {
+          <section class="event {{ event.outcome.toLowerCase() }}">
+            <div>
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.description }}</p>
+            </div>
+            <time>{{ event.occurredAt | date: 'dd/MM/yyyy HH:mm:ss' }}</time>
+          </section>
+        }
+      </div>
+    </article>
+
+    <div class="actions">
+      <a mat-stroked-button [routerLink]="['/telemetry/devices', process.deviceId]"
+        >Ver telemetría</a
+      ><a
+        mat-flat-button
+        routerLink="/monitoring/traceability"
+        [queryParams]="{ deviceId: process.deviceId }"
+        >Ver trazabilidad</a
+      >
+    </div>
+    <p class="notice">
+      La aprobación, liberación manual, emergencia y restablecimiento corresponden al Operario en la
+      aplicación móvil. El Administrador solo supervisa.
+    </p>
+  }
+</section>
