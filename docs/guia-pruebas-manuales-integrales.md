@@ -676,7 +676,15 @@ Resultado esperado:
 
 Variante: registre para el mismo dispositivo una **Pérdida de monitoreo** con la descripción `Pérdida de monitoreo simulada para comprobar el segundo tipo.`. Luego filtre por tipo **Pérdida de monitoreo** y compruebe que aparece únicamente ese nuevo caso.
 
-No existen acciones para cambiar el incidente a en revisión o cerrado.
+Para completar el flujo sencillo:
+
+1. Presione **Cerrar incidente** en el incidente de calidad.
+2. Cancele el primer diálogo y compruebe que continúa abierto.
+3. Repita la acción y confirme.
+4. Filtre por estado **Cerrado** y compruebe que aparece con su historial conservado.
+5. Filtre por estado **Abierto** y compruebe que la pérdida de monitoreo continúa pendiente.
+
+El alcance no incluye responsables, comentarios, adjuntos, prioridades ni estados intermedios. Un incidente solo pasa de `ABIERTO` a `CERRADO`.
 
 ### 10.4 Consultar trazabilidad
 

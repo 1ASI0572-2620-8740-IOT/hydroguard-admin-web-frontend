@@ -22,6 +22,7 @@ export abstract class MonitoringRepository {
     signal?: AbortSignal,
   ): Promise<MonitoringPage<QualityIncident>>;
   abstract registerIncident(request: RegisterIncidentRequest): Promise<QualityIncident>;
+  abstract closeIncident(id: string): Promise<QualityIncident>;
   abstract traceability(
     deviceId: string,
     from?: string,
