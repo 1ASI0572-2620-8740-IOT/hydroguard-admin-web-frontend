@@ -32,6 +32,11 @@ export const routes: Routes = [
           import('./telemetry/presentation/routes').then((m) => m.TELEMETRY_ROUTES),
       },
       {
+        path: 'treatments',
+        loadChildren: () =>
+          import('./water-quality-treatment/presentation/routes').then((m) => m.TREATMENT_ROUTES),
+      },
+      {
         path: '',
         loadChildren: () =>
           import('./device-configuration/presentation/routes').then((m) => m.CONFIGURATION_ROUTES),

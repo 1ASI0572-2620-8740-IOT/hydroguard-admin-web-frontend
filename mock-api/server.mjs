@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { handleConfiguration, isConfigurationPath } from './configuration/routes.mjs';
 import { handleMonitoring, isMonitoringPath } from './monitoring/routes.mjs';
 import { handleTelemetry, isTelemetryPath } from './telemetry/routes.mjs';
+import { handleTreatment, isTreatmentPath } from './treatment/routes.mjs';
 import { closeAssignment, hasProcess } from './configuration/helpers.mjs';
 
 const PORT = Number(process.env.PORT || 3000);
@@ -290,6 +291,11 @@ const handleRequest = async (req, res) => {
       const body = ['POST', 'PATCH', 'PUT'].includes(req.method) ? await readBody(req) : {};
       const result = handleMonitoring({ method: req.method, url, body, db, organizationId });
       if (result.changed) await saveDb(db);
+      return send(res, result.status, result.body);
+    }
+
+    if (isTreatmentPath(path)) {
+      const result = handleTreatment({ method: req.method, url, db, organizationId });
       return send(res, result.status, result.body);
     }
 
