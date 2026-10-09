@@ -1,7 +1,7 @@
 export type AlertSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type AlertStatus = 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED';
 export type IncidentType = 'QUALITY_INCIDENT' | 'MONITORING_LOSS';
-export type IncidentStatus = 'OPEN' | 'UNDER_REVIEW' | 'CLOSED';
+export type IncidentStatus = 'OPEN' | 'CLOSED';
 export type ProcessState = 'READING' | 'CORRECTION' | 'WAITING' | 'READY' | 'FAILURE' | 'RELEASED';
 export type StatusView = 'UPDATED' | 'OUTDATED';
 

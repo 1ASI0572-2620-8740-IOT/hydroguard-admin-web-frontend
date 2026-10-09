@@ -59,6 +59,13 @@ export class MonitoringAxiosRepository implements MonitoringRepository {
     const { data } = await apiClient.post<QualityIncidentDto>('/v1/monitoring/incidents', request);
     return mapIncident(data);
   }
+  async closeIncident(id: string) {
+    const { data } = await apiClient.patch<QualityIncidentDto>(
+      `/v1/monitoring/incidents/${encodeURIComponent(id)}/status`,
+      { status: 'CLOSED' },
+    );
+    return mapIncident(data);
+  }
   async traceability(deviceId: string, from?: string, to?: string, signal?: AbortSignal) {
     const { data } = await apiClient.get<TraceabilityDetailDto>(
       `/v1/monitoring/devices/${encodeURIComponent(deviceId)}/traceability`,

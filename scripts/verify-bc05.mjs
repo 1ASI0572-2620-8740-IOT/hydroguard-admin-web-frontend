@@ -127,6 +127,21 @@ try {
   );
   assert.ok(report.measurements >= 2);
   assert.ok(report.events.length >= 4);
+  const closedIncident = await request(
+    'PATCH',
+    `/monitoring/incidents/${encodeURIComponent(incident.id)}/status`,
+    textile,
+    { status: 'CLOSED' },
+  );
+  assert.equal(closedIncident.status, 'CLOSED');
+  assert.ok(closedIncident.closedAt);
+  await request(
+    'PATCH',
+    `/monitoring/incidents/${encodeURIComponent(incident.id)}/status`,
+    textile,
+    { status: 'CLOSED' },
+    409,
+  );
   await request(
     'POST',
     '/monitoring/reports/generate',
@@ -136,7 +151,15 @@ try {
   );
   const persisted = JSON.parse(await readFile(databasePath, 'utf8'));
   assert.ok(persisted.reports.some((item) => item.id === report.id));
-  assert.ok(persisted.incidents.some((item) => item.id === incident.id));
+  assert.ok(
+    persisted.incidents.some((item) => item.id === incident.id && item.status === 'CLOSED'),
+  );
+  assert.ok(
+    persisted.traceabilityEntries.some(
+      (item) =>
+        item.correlationId === incident.correlationId && item.eventType === 'INCIDENT_CLOSED',
+    ),
+  );
   assert.equal(
     await readFile(sourcePath, 'utf8'),
     original,

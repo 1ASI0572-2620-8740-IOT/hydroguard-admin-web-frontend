@@ -8,7 +8,6 @@ const LABELS: Readonly<Record<string, string>> = {
   ACKNOWLEDGED: 'Atendida',
   RESOLVED: 'Resuelta',
   OPEN: 'Abierto',
-  UNDER_REVIEW: 'En revisión',
   CLOSED: 'Cerrado',
   QUALITY_INCIDENT: 'Incidente de calidad',
   MONITORING_LOSS: 'Pérdida de monitoreo',
