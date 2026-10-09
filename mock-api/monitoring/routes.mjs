@@ -213,6 +213,34 @@ export const handleMonitoring = ({ method, url, body, db, organizationId }) => {
     return { status: 201, body: incidentView(db, incident, organizationId), changed: true };
   }
 
+  const incidentStatus = path.match(/^\/api\/v1\/monitoring\/incidents\/([^/]+)\/status$/);
+  if (method === 'PATCH' && incidentStatus) {
+    rejectScopeOverride(body);
+    enumField(body, 'status', ['CLOSED']);
+    const incident = find(db.incidents, decodeURIComponent(incidentStatus[1]), organizationId);
+    if (incident.status !== 'OPEN') fail(409, 'Solo un incidente abierto puede cerrarse.');
+    const closedAt = new Date().toISOString();
+    incident.status = 'CLOSED';
+    incident.closedAt = closedAt;
+    incident.updatedAt = closedAt;
+    db.traceabilityEntries.push(
+      createRecord('evt', organizationId, {
+        deviceId: incident.deviceId,
+        correlationId: incident.correlationId,
+        cycleId: null,
+        eventType: 'INCIDENT_CLOSED',
+        title: 'Incidente cerrado',
+        description: incident.description,
+        actor: 'Administrador',
+        outcome: 'SUCCESS',
+        ph: null,
+        temperature: null,
+        occurredAt: closedAt,
+      }),
+    );
+    return { status: 200, body: incidentView(db, incident, organizationId), changed: true };
+  }
+
   const traceability = path.match(/^\/api\/v1\/monitoring\/devices\/([^/]+)\/traceability$/);
   if (method === 'GET' && traceability) {
     const device = find(db.devices, decodeURIComponent(traceability[1]), organizationId);

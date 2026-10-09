@@ -14,6 +14,7 @@ import {
 import { provideDeviceConfiguration } from './device-configuration/configuration.providers';
 import { provideOperationalMonitoring } from './operational-monitoring/monitoring.providers';
 import { provideTelemetry } from './telemetry/telemetry.providers';
+import { provideTreatment } from './water-quality-treatment/treatment.providers';
 import { apiClient, AppHttpError } from './core/http/api-client';
 import { AdminSessionStore } from './iam/application/state/admin-session.store';
 
@@ -37,6 +38,7 @@ export const appConfig: ApplicationConfig = {
     ...provideDeviceConfiguration(),
     ...provideOperationalMonitoring(),
     ...provideTelemetry(),
+    ...provideTreatment(),
     provideAppInitializer(() => {
       const session = inject(AdminSessionStore);
       const router = inject(Router);

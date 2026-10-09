@@ -5,9 +5,11 @@ import { fileURLToPath } from 'node:url';
 import { handleConfiguration, isConfigurationPath } from './configuration/routes.mjs';
 import { handleMonitoring, isMonitoringPath } from './monitoring/routes.mjs';
 import { handleTelemetry, isTelemetryPath } from './telemetry/routes.mjs';
+import { handleTreatment, isTreatmentPath } from './treatment/routes.mjs';
 import { closeAssignment, hasProcess } from './configuration/helpers.mjs';
 
 const PORT = Number(process.env.PORT || 3000);
+const HOST = process.env.HOST || '127.0.0.1';
 const DB_PATH = process.env.MOCK_DB_PATH || fileURLToPath(new URL('./db.json', import.meta.url));
 const sessions = new Map();
 
@@ -293,6 +295,11 @@ const handleRequest = async (req, res) => {
       return send(res, result.status, result.body);
     }
 
+    if (isTreatmentPath(path)) {
+      const result = handleTreatment({ method: req.method, url, db, organizationId });
+      return send(res, result.status, result.body);
+    }
+
     if (req.method === 'GET' && path === '/api/v1/operators') {
       const searchTerm = (url.searchParams.get('searchTerm') || '').trim().toLowerCase();
       const status = url.searchParams.get('status');
@@ -512,7 +519,7 @@ const server = createServer((req, res) => {
     });
 });
 
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, HOST, () => {
   console.log(
     'HydroGuard Admin mock disponible en http://127.0.0.1:' + server.address().port + '/api/v1',
   );

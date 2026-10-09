@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: hydroguard-academic-mock-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run mock:api
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_VERSION
+        value: 22
