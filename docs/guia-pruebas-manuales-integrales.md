@@ -17,6 +17,7 @@ La aplicación permite probar:
 - Cierre y reasignación manual de responsabilidades con historial.
 - Consulta de versiones de configuración.
 - Consulta global e histórica de telemetría mock.
+- Consulta global y detalle de procesos de tratamiento mock.
 - Estado operacional, alertas, incidentes, trazabilidad y exportación CSV.
 - Aislamiento de información entre organizaciones.
 - Estados de carga, vacío, desconexión y diseño responsive.
@@ -118,6 +119,7 @@ La semilla conserva únicamente datos necesarios para crear el flujo desde cero 
 | Organización hidropónica | 1 Administrador, 2 Operarios que representan acceso usado y acceso pendiente, 1 grupo, 2 reservorios y 2 dispositivos                            |
 | Telemetría textil        | `dev-101` físico y en línea; `dev-102` simulado y en línea; `dev-203` físico y fuera de línea                                                    |
 | Configuración            | `dev-101` tiene versión publicada y borrador; `dev-201` muestra incompatibilidad; los dispositivos creados durante la prueba no tienen versiones |
+| Treatment textil         | 3 procesos: uno listo, uno corrigiendo y uno finalizado; la organización hidropónica conserva aprobación pendiente, espera, fallo y emergencia   |
 | Monitoreo textil         | 3 dispositivos, 2 en línea, 2 que requieren atención, 1 alerta activa y 0 incidentes abiertos                                                    |
 | Trazabilidad             | `dev-101` contiene un ciclo completo; `dev-102` contiene desviación y alerta; la organización hidropónica tiene retraso y pérdida de monitoreo   |
 
@@ -198,7 +200,7 @@ Resultado esperado:
 
 1. Escriba correo `ana.demo@hydroguard.test` y contraseña `DemoAdmin123`.
 2. Presione **Iniciar Sesión**.
-3. Compruebe que llega a `/users` y que aparecen Operarios, Grupos, Reservorios, Dispositivos, Perfiles, Estado operacional, Alertas, Incidentes, Trazabilidad y Telemetría en el menú lateral.
+3. Compruebe que llega a `/users` y que aparecen Operarios, Grupos, Reservorios, Dispositivos, Perfiles, Estado operacional, Alertas, Incidentes, Trazabilidad, Telemetría y Tratamientos en el menú lateral.
 4. Abra **Operarios**, **Grupos**, **Reservorios**, **Dispositivos** y **Perfiles**. Todos deben mostrar un estado vacío legítimo, no un error.
 5. Presione **Cerrar sesión**, use el botón **Atrás** del navegador y compruebe que vuelve al login.
 6. Inicie sesión otra vez como `ana.demo@hydroguard.test` con `DemoAdmin123` y mantenga esta sesión para las secciones 5 a 8.
@@ -620,11 +622,56 @@ Resultado esperado: aparecen cinco mediciones; la fecha final incluye el día co
 
 Use un periodo sin datos, por ejemplo `01/01/2000` a `01/01/2000`, para comprobar el estado vacío.
 
-## 10. Monitoreo, alertas, incidentes y trazabilidad
+## 10. Procesos de tratamiento
+
+Permanezca con el Administrador textil. Treatment se presenta en modo de solo lectura: el Administrador supervisa y las acciones operativas pertenecen al Operario móvil.
+
+### 10.1 Listado y filtros
+
+1. Abra **Tratamientos**.
+2. Compruebe que aparecen exactamente tres procesos textiles:
+   - `ESP32-HG-TX-001` listo para liberar, con corrección aprobada y liberación manual pendiente.
+   - `ESP32-HG-TX-002` corrigiendo, ciclo `1 / 3` y liberación no elegible.
+   - Un proceso histórico de `ESP32-HG-TX-001` finalizado y liberado automáticamente sin correcciones.
+3. Busque `ESP32-HG-TX-002`; debe quedar un solo proceso.
+4. Limpie la búsqueda y filtre sucesivamente por **Corrigiendo**, **Listo para liberar** y **Finalizado**.
+5. Use `NO-EXISTE-999` para comprobar el estado vacío y después limpie los filtros.
+
+Resultado esperado: búsqueda, estado, total y navegación funcionan sin mostrar procesos hidropónicos.
+
+### 10.2 Detalle listo para liberar
+
+1. Abra **Ver detalle** en `trt-tx-ready`.
+2. Compruebe:
+   - Configuración versión `1`.
+   - Rango pH `6.5 – 8.5`.
+   - Rango de temperatura `18 – 30 °C`.
+   - Estrategia `Corrección manual de pH`.
+   - Aprobación `Aprobada`.
+   - Ciclo `1 de 3` confirmado.
+   - Medición inicial no conforme: pH `8.9`, temperatura `28.1 °C`.
+   - Medición actual conforme: pH `7.2`, temperatura `24.6 °C`.
+   - Liberación manual pendiente de confirmación.
+3. Revise los eventos **Agua no conforme**, **Estrategia aprobada** y **Agua conforme**.
+4. Use **Ver telemetría** y regrese al proceso.
+5. Use **Ver trazabilidad** y compruebe que se selecciona el mismo dispositivo.
+
+No debe existir ningún botón para aprobar, corregir, liberar, activar emergencia o restablecer desde Angular.
+
+### 10.3 Procesos correctivo e histórico
+
+1. Regrese a **Tratamientos** y abra `trt-tx-correcting`.
+2. Compruebe que muestra actuación en ejecución, confirmación técnica pendiente y agua todavía no conforme.
+3. Abra el proceso `trt-tx-released`.
+4. Compruebe que no tiene ciclos, porque la medición inicial fue conforme, y que la liberación automática aparece autorizada y finalizada.
+
+Estos procesos son datos mock. El motor que evalúa mediciones, selecciona estrategias y ordena actuaciones pertenecerá al backend real.
+
+## 11. Monitoreo, alertas, incidentes y trazabilidad
 
 Monitoring utiliza proyecciones precargadas. Los dispositivos creados durante esta guía no generan automáticamente procesos, alertas ni eventos.
 
-### 10.1 Estado operacional
+### 11.1 Estado operacional
 
 1. Abra **Estado operacional**.
 2. Antes de atender alertas o registrar incidentes, revise los indicadores: `3` dispositivos supervisados, `2` en línea, `2` que requieren atención, `1` alerta activa y `0` incidentes abiertos.
@@ -638,7 +685,7 @@ Resultado esperado:
 - No aparecen controles para iniciar o aprobar un tratamiento.
 - `ESP32-HG-TX-001` aparece listo y actualizado; `ESP32-HG-TX-002` está en corrección con una alerta; `ESP32-HG-TX-003` está fuera de línea y desactualizado.
 
-### 10.2 Atender una alerta
+### 11.2 Atender una alerta
 
 1. Abra **Alertas**.
 2. En **Buscar**, escriba `ESP32-HG-TX-002`.
@@ -657,7 +704,7 @@ Limpie la búsqueda, seleccione **Atendida** y **Todas** las severidades. Deben 
 
 No existe una acción para resolver o reabrir alertas.
 
-### 10.3 Registrar un incidente
+### 11.3 Registrar un incidente
 
 1. Abra **Incidentes**.
 2. Presione **Registrar incidente** sin seleccionar dispositivo ni escribir descripción. Deben mostrarse errores y no debe cambiar el listado.
@@ -686,7 +733,7 @@ Para completar el flujo sencillo:
 
 El alcance no incluye responsables, comentarios, adjuntos, prioridades ni estados intermedios. Un incidente solo pasa de `ABIERTO` a `CERRADO`.
 
-### 10.4 Consultar trazabilidad
+### 11.4 Consultar trazabilidad
 
 1. Abra **Trazabilidad**.
 2. Seleccione `ESP32-HG-TX-001`.
@@ -706,7 +753,7 @@ Resultado esperado:
 - Consulte `ESP32-HG-TX-001` del `2000-01-01` al `2000-01-01`: deben mostrarse `0` eventos y el botón de reporte debe quedar deshabilitado.
 - Deje un campo requerido vacío: **Consultar** debe quedar deshabilitado o marcar el formulario como inválido.
 
-### 10.5 Generar y descargar un reporte
+### 11.5 Generar y descargar un reporte
 
 1. Vuelva a seleccionar `ESP32-HG-TX-001`, fecha inicial `2026-09-26` y fecha final del día actual; presione **Consultar**.
 2. Cuando la línea temporal vuelva a contener eventos, presione **Generar reporte**.
@@ -722,11 +769,11 @@ Resultado esperado:
 - La línea temporal queda vacía.
 - No puede generarse un reporte válido sin información suficiente.
 
-## 11. Aislamiento entre empresas
+## 12. Aislamiento entre empresas
 
 **Propósito:** demostrar que el token determina la organización y que cambiar una URL no permite consultar datos ajenos.
 
-1. Mantenga la sesión textil utilizada en las secciones 9 y 10.
+1. Mantenga la sesión textil utilizada en las secciones 9, 10 y 11.
 2. Pegue una por una las tres URL de Empresa Demostración HydroGuard guardadas en 8.4: grupo, perfil y dispositivo.
 
 Resultado esperado: los tres recursos aparecen como no encontrados; Textil San Juan no puede consultar datos creados por `ana.demo@hydroguard.test`.
@@ -757,13 +804,14 @@ Resultado esperado:
 - `Carlos Mendoza` representa perfil pendiente con código activo `HG-31Z8P9`.
 
 11. Abra **Alertas** y filtre por severidad **Crítica**: debe aparecer la pérdida de monitoreo de `ESP32-HG-HP-002`.
-12. Abra **Grupos → Crear grupo**.
+12. Abra **Tratamientos** y compruebe que aparecen exactamente cuatro procesos: aprobación pendiente, espera, fallo y emergencia. Abra la aprobación pendiente y confirme que todavía no existen ciclos; después abra fallo y emergencia y verifique que sus motivos sean distintos y que la liberación permanezca no elegible.
+13. Abra **Grupos → Crear grupo**.
 
 Resultado esperado: el segmento se hereda como Hidropónico y el campo opcional cambia a cultivo o tipo de planta.
 
 No modifique ni dé de baja estos datos hidropónicos: son escenarios semilla para identidad revocada, incompatibilidad, retraso, fallo, alerta crítica y acceso pendiente.
 
-## 12. Reglas negativas verificables desde la interfaz
+## 13. Reglas negativas verificables desde la interfaz
 
 Cierre la sesión hidropónica e inicie nuevamente con `ana.demo@hydroguard.test` y `DemoAdmin123`. Compruebe las condiciones que todavía no se probaron directamente; las filas marcadas durante secciones anteriores sirven como lista de control y no requieren repetir el alta.
 
@@ -783,7 +831,7 @@ Cierre la sesión hidropónica e inicie nuevamente con `ana.demo@hydroguard.test
 
 Las opciones ocultas demuestran prevención en la interfaz. Las reglas del servidor ante solicitudes manipuladas se cubren mediante `npm run verify:bc02`.
 
-## 13. Bajas lógicas y conservación del historial
+## 14. Bajas lógicas y conservación del historial
 
 Realice esta sección al final porque desactiva los recursos creados.
 
@@ -815,9 +863,9 @@ Resultado esperado:
 
 No está implementada la reactivación.
 
-## 14. Errores, sesión y experiencia responsive
+## 15. Errores, sesión y experiencia responsive
 
-### 14.1 Desconexión
+### 15.1 Desconexión
 
 1. Mantenga abierto un listado o Telemetría.
 2. Detenga el mock con `Ctrl+C`.
@@ -834,7 +882,7 @@ Resultado esperado:
 
 Resultado esperado: la sesión anterior recibe `401`, se limpia localmente y la aplicación vuelve al login. Inicie sesión otra vez y repita la consulta.
 
-### 14.2 Pantalla pequeña
+### 15.2 Pantalla pequeña
 
 1. Abra las herramientas de desarrollo del navegador.
 2. Use aproximadamente 390 px de ancho.
@@ -847,19 +895,20 @@ Resultado esperado:
 - Las tablas amplias permiten desplazamiento horizontal en su contenedor.
 - No se pierde la posibilidad de volver o cerrar sesión.
 
-### 14.3 Estados vacíos
+### 15.3 Estados vacíos
 
 Pruebe búsquedas inexistentes en los listados y periodos sin mediciones o eventos.
 
 Resultado esperado: aparece una explicación de estado vacío, distinta de un error de servidor.
 
-## 15. Verificación automática complementaria
+## 16. Verificación automática complementaria
 
 La guía principal es manual. Como comprobación adicional puede ejecutar:
 
 ```powershell
 npm run build
 npm run verify:bc02
+npm run verify:bc04
 npm run verify:bc05
 ```
 
@@ -867,9 +916,10 @@ Resultados esperados en la rama integrada actual:
 
 - Compilación correcta.
 - BC-02: 88 comprobaciones HTTP aprobadas, incluyendo Device Identity.
+- BC-04: consultas, estados, detalle y aislamiento de Treatment aprobados.
 - BC-05: comprobaciones aprobadas para trazabilidad, incidencias, reportes y reglas de acceso.
 
-## 16. Funciones que todavía no están implementadas
+## 17. Funciones que todavía no están implementadas
 
 ### Aplicación móvil del Operario
 
@@ -882,6 +932,7 @@ Resultados esperados en la rama integrada actual:
 
 ### Dispositivo y Edge
 
+- Ejecución del **HydroGuard Edge Agent en la laptop**. El flujo acordado es `ESP32 o Wokwi → laptop Edge → HTTPS/REST → backend en la nube`.
 - Autenticación real mediante la credencial técnica.
 - Activación, rotación o reenrolamiento de credenciales.
 - Recepción de datos desde ESP32 o Wokwi.
@@ -889,12 +940,11 @@ Resultados esperados en la rama integrada actual:
 - Detección real de duplicados y validación física de mediciones.
 - Cálculo temporal real del heartbeat.
 
-### Telemetry y Treatment
+### Telemetry y ejecución real de Treatment
 
 - Actualización automática, WebSocket o streaming.
 - Historial de comandos técnicos.
-- Evaluación de conformidad del agua.
-- Selección automática real de estrategia.
+- Motor backend para evaluar conformidad y seleccionar automáticamente una estrategia.
 - Dosificación, actuación térmica o LED controlados por el sistema.
 - Ciclos automáticos de corrección y reevaluación.
 - Autorización real de apertura o cierre de válvula.
@@ -904,7 +954,7 @@ Resultados esperados en la rama integrada actual:
 
 - Generación automática de alertas a partir de telemetría nueva.
 - Resolución o reapertura de alertas.
-- Cambio de estado de incidentes.
+- Reapertura de incidentes cerrados y estados intermedios de investigación.
 - Firebase Cloud Messaging y notificaciones push.
 - Actualizaciones operativas en tiempo real.
 
@@ -916,7 +966,7 @@ Resultados esperados en la rama integrada actual:
 - Crear un segundo Administrador para la misma empresa.
 - Persistencia, seguridad y transacciones de un backend productivo.
 
-## 17. Criterio de aceptación global actual
+## 18. Criterio de aceptación global actual
 
 La aplicación web actual se considera validada cuando una persona puede:
 
@@ -925,9 +975,10 @@ La aplicación web actual se considera validada cuando una persona puede:
 3. Crear cuentas, perfiles, asignaciones y códigos.
 4. Cerrar y reasignar responsabilidades conservando el historial.
 5. Consultar configuraciones y telemetría sin inventar datos ausentes.
-6. Atender alertas, registrar incidentes y exportar trazabilidad.
-7. Comprobar el aislamiento entre organizaciones.
-8. Ejecutar bajas lógicas respetando dependencias.
-9. Recuperarse de errores de red y utilizar la interfaz en pantalla pequeña.
+6. Consultar procesos, estrategias, ciclos, fallos y liberaciones en modo administrativo.
+7. Atender alertas, registrar y cerrar incidentes, y exportar trazabilidad.
+8. Comprobar el aislamiento entre organizaciones.
+9. Ejecutar bajas lógicas respetando dependencias.
+10. Recuperarse de errores de red y utilizar la interfaz en pantalla pequeña.
 
-Superar estas pruebas valida el frontend administrativo y sus contratos mock. No demuestra todavía el funcionamiento del ESP32, Flutter, Treatment, FCM ni el backend productivo futuro.
+Superar estas pruebas valida el frontend administrativo, incluida la supervisión de Treatment, y sus contratos mock. No demuestra todavía el funcionamiento físico del ESP32, la capa Edge en la laptop, Flutter, el motor backend de Treatment, FCM ni el backend productivo futuro.
