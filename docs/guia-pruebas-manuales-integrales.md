@@ -82,6 +82,19 @@ Abra:
 
 El estado de la API debe responder `UP`. El puerto `3000` contiene la API y no la interfaz.
 
+#### 2.3.1 Alternativa: probar el despliegue Vercel + Render
+
+Esta alternativa reemplaza las dos terminales locales por servicios publicados. Primero debe desplegarse el mock en Render usando `render.yaml` y después el frontend en Vercel usando `vercel.json`.
+
+1. En Render, cree un **Blueprint** conectado con este repositorio y confirme el servicio `hydroguard-academic-mock-api`.
+2. Espere a que `https://hydroguard-academic-mock-api.onrender.com/api/v1/health` responda `{"status":"UP"}`. Si Render asigna otro dominio, sustituya ese dominio en la primera regla de `vercel.json` antes de desplegar el frontend.
+3. En Vercel, importe el mismo repositorio, seleccione Angular y despliegue la rama que se desea probar. `vercel.json` ejecuta `npm run build`, publica `dist/hydroguard-admin-web-frontend/browser`, reenvía `/api/*` hacia Render y entrega `index.html` para las rutas del Router.
+4. Abra la URL asignada por Vercel. No utilice directamente la URL de Render como interfaz: Render expone solamente la API.
+5. Compruebe `<URL_VERCEL>/api/v1/health` y luego abra `<URL_VERCEL>/login`.
+6. Inicie sesión y actualice el navegador en `/users`, `/treatments` y `/monitoring/incidents`. Cada ruta debe volver a mostrar la misma pantalla y nunca un `404` de Vercel.
+
+El plan gratuito de Render puede suspenderse por inactividad. La primera solicitud puede tardar y un reinicio devuelve `db.json` a su semilla. Para una demostración formal, abra primero el endpoint de salud, espere la respuesta `UP` y después comience desde el login. No ejecute simultáneamente la guía local y la desplegada esperando que compartan datos: son bases independientes.
+
 ### 2.4 Cuentas de demostración
 
 | Organización | Administrador                | Contraseña         |
@@ -918,6 +931,14 @@ Resultados esperados en la rama integrada actual:
 - BC-02: 88 comprobaciones HTTP aprobadas, incluyendo Device Identity.
 - BC-04: consultas, estados, detalle y aislamiento de Treatment aprobados.
 - BC-05: comprobaciones aprobadas para trazabilidad, incidencias, reportes y reglas de acceso.
+
+Si se valida el despliegue, complete además esta comprobación mínima:
+
+1. El endpoint `/api/v1/health` responde a través del dominio de Vercel.
+2. Login y cierre de sesión funcionan.
+3. Una escritura sencilla —por ejemplo, atender una alerta— persiste al cambiar de pantalla mientras el servicio Render permanece activo.
+4. Actualizar directamente `/treatments` y `/monitoring/traceability` no produce `404`.
+5. Las organizaciones textil e hidropónica continúan aisladas.
 
 ## 17. Funciones que todavía no están implementadas
 
