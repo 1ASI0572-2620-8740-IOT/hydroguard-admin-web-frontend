@@ -9,6 +9,7 @@ import { handleTreatment, isTreatmentPath } from './treatment/routes.mjs';
 import { closeAssignment, hasProcess } from './configuration/helpers.mjs';
 
 const PORT = Number(process.env.PORT || 3000);
+const HOST = process.env.HOST || '127.0.0.1';
 const DB_PATH = process.env.MOCK_DB_PATH || fileURLToPath(new URL('./db.json', import.meta.url));
 const sessions = new Map();
 
@@ -518,7 +519,7 @@ const server = createServer((req, res) => {
     });
 });
 
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, HOST, () => {
   console.log(
     'HydroGuard Admin mock disponible en http://127.0.0.1:' + server.address().port + '/api/v1',
   );

@@ -6,6 +6,11 @@ El bounded context de configuración operativa (BC-02) permite administrar grupo
 
 La [guía unificada de pruebas manuales](docs/guia-pruebas-manuales-integrales.md) describe, paso a paso, todos los flujos disponibles, sus variantes, resultados esperados y limitaciones actuales.
 
+Para comprender la solución también están disponibles:
+
+- [Arquitectura, actores y flujos](docs/arquitectura-y-flujos-de-la-aplicacion.md).
+- [Guía técnica de estructura, archivos y estados](docs/guia-tecnica-estructura-y-estados.md).
+
 ## Requisitos
 
 - Node.js 22 LTS.
@@ -37,6 +42,17 @@ Abre `http://127.0.0.1:4200/`. Desde el acceso se puede registrar una empresa ju
 
 El frontend consume rutas `/api/v1`. Durante el desarrollo, [proxy.conf.json](proxy.conf.json) dirige `/api` hacia el mock local; en producción se conserva la misma ruta relativa para integrarse con el backend real.
 
+## Despliegue académico
+
+El despliegue de demostración separa los dos procesos:
+
+- `vercel.json` compila Angular, publica `dist/hydroguard-admin-web-frontend/browser`, reenvía `/api/*` al mock y configura el fallback de Angular Router.
+- `render.yaml` ejecuta el mock como un Web Service Node.js en Render.
+
+Despliegue primero el Blueprint de Render y compruebe `/api/v1/health`. Después importe el repositorio en Vercel. La configuración espera el dominio `https://hydroguard-academic-mock-api.onrender.com`; si Render asigna otro, actualice la primera regla de `vercel.json` antes de desplegar Vercel.
+
+El plan gratuito de Render utiliza almacenamiento efímero: un reinicio o nuevo despliegue devuelve el mock a la semilla de `db.json`. Esta configuración es adecuada para la demostración académica, no para almacenar datos reales.
+
 El registro usa `POST /api/v1/organization-registrations`. Recibe los datos de la empresa —nombre, RUC, teléfono y un solo segmento— y los del administrador —nombre, correo y contraseña—. El acceso posterior usa el correo del administrador y su contraseña.
 
 El mock persiste los registros en `mock-api/db.json`; las contraseñas visibles allí son únicamente datos locales de desarrollo. En el backend real, la creación de empresa y administrador debe ejecutarse en una sola transacción, el RUC y el correo deben tener restricciones únicas, la relación empresa-administrador debe garantizar uno a uno y la contraseña debe almacenarse mediante un hash seguro. La autorización del backend debe derivar siempre la empresa desde la sesión y nunca confiar en un `organizationId` enviado por el cliente.
@@ -57,6 +73,8 @@ npm start          # Servidor de desarrollo
 npm run mock:api   # Backend mock basado en mock-api/db.json
 npm run build      # Compilación de producción
 npm run verify:bc02 # Verificación HTTP sobre una base temporal
+npm run verify:bc04 # Verificación de Treatment
+npm run verify:bc05 # Verificación de Monitoring
 ```
 
 ## Estructura principal
@@ -73,6 +91,8 @@ npm run verify:bc02 # Verificación HTTP sobre una base temporal
 ```bash
 npm run build
 npm run verify:bc02
+npm run verify:bc04
+npm run verify:bc05
 ```
 
 La compilación se genera en `dist/`, directorio excluido del repositorio.
