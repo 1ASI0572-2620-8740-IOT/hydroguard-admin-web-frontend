@@ -9,9 +9,20 @@ Esta guía organiza el desarrollo frontend de HydroGuard en dos aplicaciones ind
 
 Las aplicaciones consumen los mismos contratos del backend, pero no ofrecen las mismas funciones. La separación evita que el Operario reciba herramientas administrativas innecesarias y que el Administrador ejecute accidentalmente acciones operativas sobre un dispositivo.
 
+### Estado de esta guía
+
+Revisión de alineación realizada el **21 de octubre de 2026** contra ambos frontends, el Mock API y la arquitectura vigente del informe:
+
+- La aplicación web administrativa y sus cinco módulos funcionales están implementados.
+- Device Identity and Access se presenta dentro del flujo administrativo de Dispositivos, aunque conserva su límite de dominio y sus datos propios.
+- El Mock API implementa los contratos web actuales bajo `/api/v1`.
+- La aplicación móvil Flutter cuenta con base Material 3, navegación protegida, DDD por bounded context, BLoC por feature y consumo HTTP de los contratos mock de Operario.
+- `db.json` es una fixture interna del mock. Flutter y Angular solo pueden depender de respuestas HTTP, nunca de sus colecciones internas.
+- Cuando esta guía distingue **implementado** y **requerido para Flutter**, esa distinción tiene prioridad sobre ejemplos históricos o estructuras propuestas anteriormente.
+
 ## 2. Modelo operativo y flujo completo de incorporación
 
-HydroGuard es una plataforma multiempresa. Cada empresa registra un único Administrador, quien prepara toda su estructura operativa desde la aplicación web antes de entregar acceso a un Operario. El Operario recibe externamente un código de primer acceso, entra directamente en la aplicación móvil y completa la configuración operativa de los reservorios y dispositivos que ya le fueron asignados.
+HydroGuard es una plataforma multiempresa. Cada empresa registra un único Administrador, quien prepara toda su estructura operativa desde la aplicación web antes de entregar acceso a un Operario. El Operario recibe externamente su identificador, su contraseña definitiva y un código de primer acceso. La aplicación móvil valida los tres datos en una única operación, activa el perfil e inicia la primera sesión; después el Operario completa la configuración operativa de los reservorios y dispositivos que ya le fueron asignados.
 
 La aplicación web ofrece un registro público de empresa. En una única operación se registran el nombre, RUC, teléfono y único segmento de la empresa, junto con el nombre, correo y contraseña definitiva de su Administrador. Pueden registrarse varias empresas, pero cada una conserva exactamente un Administrador. El correo es el identificador de acceso y debe ser único porque el inicio de sesión no solicita un código de empresa. El formulario no permite seleccionar roles.
 
@@ -68,15 +79,15 @@ El Administrador no puede generar el código si falta la cuenta, el grupo, al me
 ### Primer acceso del Operario en Flutter
 
 1. El Operario abre “Ingresar con código”.
-2. Introduce el código recibido del Administrador.
-3. El backend valida que exista, no haya sido utilizado ni revocado y que el perfil continúe completo.
+2. Introduce el identificador, la contraseña definitiva y el código recibidos del Administrador.
+3. El backend autentica las credenciales humanas y valida que el código pertenezca a esa misma cuenta y organización, esté `ACTIVE` y que el perfil continúe completo.
 4. La aplicación muestra la organización, grupo y los reservorios-dispositivos asignados para que el Operario compruebe el contexto.
-5. Al confirmar, el código inicia directamente la primera sesión y pasa a `USED`.
-6. El perfil pasa a `ACTIVE` y la app muestra todos sus reservorios; no se solicita cambio de contraseña.
+5. Al confirmar, una operación transaccional marca el código como `USED`, activa el perfil y devuelve una sesión con rol `OPERATOR`.
+6. La app muestra todos sus reservorios; no se solicita cambio de contraseña.
 7. El Operario selecciona cada reservorio y completa su configuración operativa.
 8. Hasta publicar una configuración válida, puede consultar el dispositivo, pero no iniciar un proceso de tratamiento.
 
-Para simplificar el prototipo, el código no vence por tiempo. Sigue siendo de un solo uso y el Administrador puede revocarlo o generar otro mientras no haya sido utilizado. Los accesos posteriores se realizan con el identificador y la contraseña definitiva creada por el Administrador.
+Para simplificar el prototipo, el código no vence por tiempo. Sigue siendo de un solo uso y el Administrador puede revocarlo o generar otro mientras no haya sido utilizado. Los accesos posteriores se realizan únicamente con el identificador y la contraseña definitiva creada por el Administrador. El código no sustituye a la contraseña ni funciona por sí solo como credencial suficiente.
 
 ### Desvinculación y reasignación
 
@@ -99,7 +110,7 @@ El Operario puede ver los nombres de los demás integrantes de su grupo y qué r
 | Propósito | Completar configuraciones y operar directamente sus reservorios. | Preparar grupos, cuentas, reservorios, dispositivos, perfiles y supervisar el sistema. |
 | Tecnología | Flutter y Dart. | Angular y TypeScript. |
 | Patrón principal | BLoC por feature. | DDD frontend por bounded context. |
-| Comunicación HTTP | Retrofit para Dart, con clientes tipados y Dio únicamente como transporte interno. | Axios con interceptores. |
+| Comunicación HTTP | `package:http` versión `^1.6.0`, encapsulado en un cliente compartido y datasources tipados. | Axios con interceptores. |
 | Alcance de datos | Sus asignaciones y la identificación básica de los integrantes del grupo. | Todos los usuarios, grupos, reservorios, dispositivos, procesos e incidentes de su empresa. |
 | Acciones críticas | Configurar, aprobar una vez el tratamiento, liberar manualmente, emergencia y restablecimiento. | Registrar y provisionar dispositivos, vincular, asignar, revocar identidad, generar código y supervisar. |
 | Presentación | Uso rápido en campo, selector de reservorio y prioridad operativa. | Tablas, filtros, formularios administrativos y vistas comparativas. |
@@ -116,7 +127,7 @@ No se implementará una interfaz única que cambie completamente según el rol. 
 - Material Design como lenguaje visual común.
 - Angular Material para la aplicación web.
 - Widgets Material de Flutter para la aplicación móvil.
-- Integración desacoplada con API mediante Retrofit en Flutter y Axios en Angular.
+- Integración desacoplada con API mediante `package:http ^1.6.0` en Flutter y Axios en Angular.
 - Backend mock contractual mediante `mock-api/server.mjs` y `db.json`.
 - Estados de carga, contenido vacío, error, desconexión y falta de permisos.
 - Propuesta inicial de pantallas y navegación, pendiente de observaciones antes de formalizar diseños en Figma.
@@ -186,9 +197,12 @@ UserRole:
 OperatingEnvironment:
   INTEGRAL_PRODUCT | SIMULATION | ACADEMIC_PROTOTYPE
 
-ProcessState:
+TreatmentState:
   NOT_STARTED | MEASURING | EVALUATING | PENDING_CORRECTION_APPROVAL | CORRECTING | WAITING |
   REEVALUATING | READY | RELEASING | FAILED | EMERGENCY | COMPLETED
+
+MonitoringProcessState:
+  READING | CORRECTION | WAITING | READY | FAILURE | RELEASED
 
 DeviceIdentityStatus:
   PENDING | ACTIVE | REVOKED
@@ -205,6 +219,15 @@ DeviceAvailability:
 DeviceLifecycleStatus:
   ACTIVE_UNLINKED | ACTIVE_UNASSIGNED | ACTIVE_ASSIGNED | MAINTENANCE | INACTIVE
 
+DeviceCapability:
+  PH_SENSOR | TEMPERATURE_SENSOR | DOSING | HEATING | COOLING | RELEASE_VALVE
+
+ConfigurationVersionStatus:
+  DRAFT | PUBLISHED
+
+ConfigurationCompatibilityStatus:
+  MISSING | COMPATIBLE | INCOMPATIBLE
+
 OperatorProfileStatus:
   PENDING_FIRST_ACCESS | ACTIVE | INACTIVE
 
@@ -213,9 +236,23 @@ FirstAccessCodeStatus:
 
 AssignmentStatus:
   ACTIVE | CLOSED
+
+ApprovalStatus:
+  NOT_REQUIRED | PENDING | APPROVED
+
+ReleaseEligibility:
+  NOT_ELIGIBLE | PENDING_CONFIRMATION | AUTHORIZED
+
+AlertStatus:
+  ACTIVE | ACKNOWLEDGED | RESOLVED
+
+IncidentStatus:
+  OPEN | CLOSED
 ```
 
-Las traducciones se aplican únicamente en la capa de presentación. Los valores enviados a la API deben permanecer estables.
+`TreatmentState` representa la máquina de estados completa. `MonitoringProcessState` es una proyección resumida utilizada por el dashboard y no puede emplearse para habilitar acciones de Treatment. Las traducciones se aplican únicamente en la capa de presentación. Los valores enviados a la API deben permanecer estables.
+
+Los nombres `PH_SENSOR`, `TEMPERATURE_SENSOR`, `DOSING`, `HEATING`, `COOLING` y `RELEASE_VALVE` son los valores contractuales utilizados actualmente por Angular y el Mock API. Las expresiones conceptuales del informe —medición de pH, medición de temperatura, dosificación física, actuación térmica y control de flujo— no constituyen valores alternativos de la API.
 
 ## 6. Backend mock con `db.json`
 
@@ -223,20 +260,23 @@ Las traducciones se aplican únicamente en la capa de presentación. Los valores
 
 El mock permite construir navegación, formularios, estados y consumo HTTP antes de disponer del backend real. Se utilizará `mock-api/server.mjs` sobre un archivo `db.json`; el servidor expondrá el mismo contrato `/api/v1` que consumirá el frontend con el backend real.
 
-### Estructura recomendada
+### Estructura actual
 
 ```text
 mock-api/
 ├── db.json
-├── routes.json
-├── package.json
-└── README.md
+├── server.mjs
+├── configuration/
+├── telemetry/
+├── treatment/
+└── monitoring/
 ```
 
 ### Colecciones mínimas de `db.json`
 
 ```json
 {
+  organizations: [],
   users: [],
   groups: [],
   reservoirs: [],
@@ -252,9 +292,12 @@ mock-api/
   alerts: [],
   incidents: [],
   traceabilityEntries: [],
+  treatmentProcesses: [],
   reports: []
 }
 ```
+
+`processes` es actualmente la proyección resumida que consume el dashboard de Monitoring. `treatmentProcesses` contiene el detalle contractual que exponen `/api/v1/treatments` y `/api/v1/treatments/{processId}`. Esta duplicación es propia del mock actual: la app móvil debe consumir el contrato HTTP de Treatment y nunca intentar combinar ambas colecciones.
 
 ### Relaciones simuladas
 
@@ -278,8 +321,9 @@ mock-api/
 - Las fechas se expresan en UTC e ISO 8601.
 - Las contraseñas incluidas son exclusivamente ficticias.
 - El mock nunca conserva la credencial original del dispositivo. Solo devuelve una credencial ficticia en la respuesta de alta y guarda un hash no utilizable como fixture.
-- El mock de autenticación puede validar usuarios y códigos falsos, pero no representa seguridad real.
+- El mock de autenticación puede validar usuarios y códigos falsos, pero no representa seguridad real. Los códigos generados por el mock siguen el formato `HG-` más seis caracteres hexadecimales y se guardan en texto legible solo para la demostración.
 - El código de primer acceso no vence en el prototipo, pero solo puede cambiar de `ACTIVE` a `USED` o `REVOKED`.
+- El backend real debe guardar un hash del código y ejecutar el consumo, la activación del perfil y la creación de la sesión en una sola transacción.
 - El servidor mock reproduce validaciones y transiciones mínimas para probar el frontend, pero no sustituye las reglas definitivas ni las pruebas del backend real. Los escenarios de `db.json` son fixtures de desarrollo.
 - Los comandos críticos pueden simularse actualizando el recurso correspondiente, pero la aplicación no debe asumir que podrá hacerlo directamente en producción.
 - No se codificarán URLs de localhost dentro de widgets o componentes; cada aplicación utilizará configuración de entorno.
@@ -313,7 +357,8 @@ El `db.json` debe contener, como mínimo:
 - El registro público crea una empresa nueva junto con su único Administrador. No permite agregar otro Administrador a una empresa existente.
 - El Administrador inicia sesión con correo y contraseña; el correo es único entre empresas.
 - El backend limita cada operación al `organizationId` de la sesión autenticada.
-- El primer acceso móvil se realiza directamente con el código único y no solicita cambio de contraseña.
+- El primer acceso móvil envía identificador, contraseña definitiva y código único; no solicita cambio de contraseña.
+- El backend debe comprobar que credenciales, código, cuenta, organización y perfil correspondan entre sí antes de crear la sesión.
 - El código no caduca por tiempo, pero es de un solo uso y puede ser revocado antes de utilizarse.
 - Después del primer acceso, el Operario ingresa con el identificador y la contraseña definitiva entregados por el Administrador.
 - Si el usuario intenta ingresar en la aplicación incorrecta, se cierra la sesión iniciada y se informa qué canal le corresponde.
@@ -366,7 +411,20 @@ feature/
     └── widgets/
 ```
 
-La UI emite eventos BLoC, el BLoC ejecuta un caso de uso y el repositorio selecciona el datasource remoto basado en Retrofit o el datasource mock. Los widgets, BLoC y casos de uso no llaman directamente a Retrofit, Dio ni `db.json`.
+La UI emite eventos BLoC, el BLoC ejecuta un caso de uso y el repositorio utiliza un datasource remoto tipado. Ese datasource delega la comunicación a un único cliente basado en `package:http`. Los widgets, BLoC, casos de uso y repositorios no utilizan directamente `http.Client` ni conocen la estructura de `db.json`.
+
+Flujo técnico estándar de una operación móvil:
+
+1. El widget valida únicamente formato y campos obligatorios, y emite un evento al BLoC.
+2. El BLoC evita envíos duplicados, cambia a estado de carga y ejecuta un caso de uso.
+3. El caso de uso aplica la intención de la operación y llama a la interfaz del repositorio.
+4. La implementación del repositorio delega la solicitud al datasource del bounded context.
+5. El datasource construye el endpoint y el DTO, y usa `HydroGuardHttpClient`.
+6. `HydroGuardHttpClient` agrega autenticación, `Content-Type`, correlación, tiempo de espera y codificación JSON; luego ejecuta la solicitud con un `http.Client` inyectado.
+7. El datasource convierte la respuesta en DTO; el repositorio la transforma en entidad de dominio.
+8. El BLoC publica éxito, vacío, falta de permisos, desconexión o error y la vista se actualiza sin inferir reglas del backend.
+
+Las reglas de autorización, conformidad, transición de procesos y acciones permitidas continúan siendo responsabilidad del backend. La aplicación representa `allowedActions` y estados recibidos; no los recalcula.
 
 ### Navegación móvil
 
@@ -383,11 +441,11 @@ La pantalla inicial muestra un selector cuando existe más de un reservorio asig
 
 ### M-BC-01 — Identity and Access Management
 
-**Función:** efectuar el primer acceso con el código emitido por el Administrador, autenticar posteriormente al Operario y mantener una sesión limitada a su perfil y asignaciones.
+**Función:** efectuar el primer acceso con las credenciales definitivas y el código emitido por el Administrador, autenticar posteriormente al Operario y mantener una sesión limitada a su perfil y asignaciones.
 
 **Acciones:**
 
-- Iniciar la primera sesión mediante el código único.
+- Iniciar la primera sesión mediante identificador, contraseña definitiva y código único.
 - Mostrar grupo, reservorios y dispositivos antes de confirmar el primer acceso.
 - Continuar a la aplicación sin solicitar cambio de contraseña.
 - Iniciar las sesiones posteriores con el identificador y la contraseña definitiva.
@@ -407,6 +465,16 @@ La pantalla inicial muestra un selector cuando existe más de un reservorio asig
 - Estados: `initial`, `submitting`, `authenticated`, `unauthenticated`, `forbidden` y `failure`.
 
 **No incluye:** autorregistro, creación de cuentas, asignación de roles ni administración de otras personas.
+
+**Contrato requerido antes de integrar esta pantalla:**
+
+```text
+POST /api/v1/authentication/operator-first-access
+Body: { identifier, password, code }
+Response: { id, identifier, organizationId, token, role: OPERATOR, expiresAt? }
+```
+
+La operación consume el código, activa el perfil y crea la sesión de forma atómica en el Mock API. El backend real deberá conservar la misma regla con transacción, hash y persistencia segura.
 
 ### M-BC-02 — Device and Operational Configuration
 
@@ -529,11 +597,8 @@ La pantalla inicial muestra un selector cuando existe más de un reservorio asig
 ```text
 src/app/
 ├── core/
-│   ├── auth/
-│   ├── config/
 │   ├── http/
-│   ├── layout/
-│   └── error-handling/
+│   └── layout/
 ├── shared/
 │   ├── presentation/
 │   └── utils/
@@ -557,9 +622,8 @@ bounded-context/
 │   ├── use-cases/
 │   └── state/
 ├── infrastructure/
-│   ├── axios/
-│   ├── dto/
-│   └── mappers/
+│   ├── http/
+│   └── storage/        # solo cuando el contexto lo requiere
 └── presentation/
     ├── pages/
     ├── components/
@@ -570,16 +634,16 @@ Los componentes usan casos de uso; los casos de uso dependen de puertos; y los a
 
 ### Navegación web
 
-- Resumen global.
-- Operarios y perfiles.
-- Grupos y reservorios.
-- Dispositivos y asignaciones.
-- Códigos de primer acceso.
-- Configuraciones publicadas.
-- Telemetría global.
-- Tratamientos.
-- Estado operacional, alertas, incidentes y trazabilidad.
-- Perfil y cierre de sesión.
+- Registro de empresa y acceso administrativo: `/register` y `/login`.
+- Operarios, detalle y códigos de primer acceso: `/users`.
+- Grupos, reservorios, dispositivos, perfiles y asignaciones: `/groups`, `/reservoirs`, `/devices` y `/operator-profiles`.
+- Configuraciones publicadas o en borrador: `/devices/:deviceId/configurations`.
+- Estado operacional, alertas, incidentes y trazabilidad: `/monitoring` y sus rutas hijas.
+- Telemetría global y detalle por dispositivo: `/telemetry`.
+- Listado y detalle de tratamientos: `/treatments`.
+- Cierre de sesión desde el layout lateral.
+
+No existe actualmente una ruta independiente de “Resumen global”, una página de perfil del Administrador ni una página web de comandos del dispositivo. No deben documentarse como implementadas.
 
 ### W-BC-01 — Identity and Access Management
 
@@ -639,11 +703,13 @@ La web integra aquí las capacidades administrativas de Device Identity and Acce
 - `/groups/new` — `WorkGroupCreatePage`.
 - `/groups/:groupId` — `WorkGroupDetailPage` con Operarios y reservorios.
 - `/reservoirs/new` — `ReservoirCreatePage`.
+- `/reservoirs` — `ReservoirsPage`.
 - `/reservoirs/:reservoirId` — `ReservoirDetailPage`.
 - `/devices` — `DevicesPage`.
 - `/devices/new` — `DeviceCreatePage`.
 - `/devices/:deviceId` — `DeviceDetailPage`.
 - `/operator-profiles` — `OperatorProfilesPage`.
+- `/operator-profiles/new` — `OperatorProfileCreatePage`.
 - `/operator-profiles/:profileId` — `OperatorProfileDetailPage` y `AssignmentManager`.
 - `/devices/:deviceId/configurations` — `ConfigurationVersionsPage`.
 
@@ -666,7 +732,8 @@ La creación completa del Operario se presenta como un flujo guiado de la aplica
 
 - `/telemetry` — `TelemetryOverviewPage`.
 - `/telemetry/devices/:deviceId` — `DeviceTelemetryDetailPage`.
-- `/telemetry/devices/:deviceId/commands` — `DeviceCommandsPage`.
+
+La consulta separada de comandos del dispositivo permanece como capacidad futura del contrato; no existe actualmente una ruta ni una página `DeviceCommandsPage` en Angular.
 
 **Restricción:** el Administrador puede observar la actuación y la válvula, pero la pantalla no presenta botones de inicio, liberación manual o emergencia.
 
@@ -735,18 +802,43 @@ El ciclo de incidente se mantiene deliberadamente simple: `OPEN → CLOSED`. No 
 
 ## 11. Integración HTTP
 
-### Flutter con Retrofit
+### Flutter con `package:http ^1.6.0`
 
-- Definir una interfaz `HydroGuardApiClient` anotada con `@RestApi`, dividida en clientes por bounded context cuando el contrato crezca.
-- Declarar cada endpoint mediante las anotaciones de Retrofit (`@GET`, `@POST`, `@PUT`, `@PATCH` y `@DELETE`) y utilizar DTO tipados.
-- Generar la implementación con `retrofit_generator` y `build_runner`; los archivos generados no se editan manualmente.
-- Serializar y deserializar DTO mediante `json_serializable`, manteniendo separados los DTO y las entidades del dominio móvil.
-- Utilizar una instancia Dio únicamente como transporte interno configurado por ambiente para `baseUrl`, tiempo de espera e interceptores.
-- Incorporar en Dio los encabezados de token, correlación y versión del cliente antes de entregar la instancia a Retrofit.
-- Convertir centralmente `DioException` y respuestas HTTP en fallos propios de la aplicación antes de llegar al BLoC.
-- Cancelar el polling cuando la aplicación quede en segundo plano.
-- Permitir que los repositorios alternen entre `RetrofitRemoteDataSource` y `MockDataSource` sin modificar widgets ni BLoC.
-- Evitar cualquier llamada manual con `dio.get`, `dio.post` u operaciones equivalentes fuera de la infraestructura generada por Retrofit.
+Dependencia obligatoria en `pubspec.yaml`:
+
+```yaml
+dependencies:
+  http: ^1.6.0
+```
+
+`package:http` será el único cliente de transporte de la aplicación móvil. Es suficiente para el alcance REST actual y evita incorporar capas adicionales. Como no ofrece interceptores, la configuración transversal se resolverá una sola vez en infraestructura, no en cada feature.
+
+- Crear un `HydroGuardHttpClient` compartido que reciba por inyección un `http.Client`, la `baseUrl`, el proveedor de sesión y un generador de `X-Correlation-Id`.
+- Exponer en ese cliente operaciones internas para `GET`, `POST`, `PUT`, `PATCH` y `DELETE`, con `Uri` construido de forma segura y `queryParameters` explícitos.
+- Centralizar los encabezados `Accept`, `Content-Type`, `Authorization`, `X-Correlation-Id` y versión de la aplicación.
+- Aplicar un tiempo de espera configurable con `Future.timeout` y convertir excepciones de red, formato y timeout en fallos propios.
+- Mapear centralmente `400`, `401`, `403`, `404`, `409`, `422` y `5xx`; el cliente no debe devolver mensajes técnicos directamente a la UI.
+- Mantener un datasource remoto por bounded context, por ejemplo `IamRemoteDataSource`, `ConfigurationRemoteDataSource`, `TelemetryRemoteDataSource`, `TreatmentRemoteDataSource` y `MonitoringRemoteDataSource`.
+- Mantener DTO tipados y separados de las entidades. Puede utilizarse `json_serializable` para reducir código repetitivo, pero no es obligatorio para usar `package:http`.
+- Hacer que los repositorios dependan de los datasources y realicen el mapeo DTO-entidad; ningún repositorio debe construir solicitudes HTTP por su cuenta.
+- Inyectar `http.Client` para permitir sustitución controlada en pruebas futuras y cerrar el cliente únicamente al finalizar su ciclo de vida.
+- Detener temporizadores y polling cuando la aplicación pase a segundo plano. Las respuestas atrasadas deben descartarse si ya no corresponden al reservorio o a la pantalla activa.
+- Usar el mismo contrato `/api/v1` con el mock y con el backend real; solo cambia la `baseUrl` por ambiente.
+
+Estructura mínima esperada:
+
+```text
+lib/core/http/
+├── hydroguard_http_client.dart
+├── api_failure.dart
+├── api_response_decoder.dart
+└── correlation_id_generator.dart
+
+lib/features/<feature>/data/
+├── datasources/<feature>_remote_datasource.dart
+├── dto/
+└── repositories/<feature>_repository_impl.dart
+```
 
 ### Angular con Axios
 
@@ -771,31 +863,37 @@ El backend real aún debe completar varios contratos. El mock debe anticipar est
 
 | Contexto | App móvil del Operario | App web del Administrador |
 |:--|:--|:--|
-| IAM | Primer acceso directo por código, login posterior con credenciales definitivas y perfil actual. | Registro de empresa y su único Administrador, login, cuentas de Operario, códigos, revocación y eliminación lógica. |
+| IAM | Primer acceso con identificador, contraseña definitiva y código; login posterior con credenciales definitivas y perfil actual. | Registro de empresa y su único Administrador, login, cuentas de Operario, códigos, revocación y eliminación lógica. |
 | Device Identity | Sin capacidades administrativas. | Integrado en Dispositivos: entrega única de credencial, consulta de estado y revocación. |
 | Configuration | Grupo propio, miembros visibles, asignaciones, configuración por reservorio-dispositivo y publicación. | Grupos, reservorios, dispositivos, perfiles, vinculación, asignación, desvinculación y versiones. |
 | Telemetry | Última medición, historial, disponibilidad y comandos de cada dispositivo propio. | Resumen global, detalle por dispositivo y filtros. |
 | Treatment | Proceso activo, aprobación única de estrategia, liberación manual, emergencia y restablecimiento. | Listado global y detalle de procesos en modo consulta, implementados contra el contrato mock. |
 | Monitoring | Alertas e historial del dispositivo asignado. | Estado operacional, alertas, ciclo simple de incidentes, trazabilidad y reporte CSV, implementados contra el contrato mock. |
 
-### Brechas que deben corregirse antes de conectar el backend real
+### Contratos ya verificados en la web y el Mock API
 
-- La respuesta de autenticación debe incluir rol, `organizationId` y vigencia de sesión.
-- El registro de empresa y Administrador debe ser transaccional y aplicar unicidad a RUC y correo.
-- Se necesita un endpoint transaccional de primer acceso que consuma el código, active el perfil e inicie la sesión sin modificar la contraseña definitiva.
-- El código debe poder consultarse por estado, revocarse y regenerarse antes de utilizarse; no requiere fecha de caducidad en el alcance actual.
-- Se necesitan consultas paginadas de usuarios y dispositivos.
-- Los contratos deben representar grupos, reservorios, perfiles de Operario y asignaciones con las cardinalidades establecidas.
-- La API debe garantizar un solo grupo por Operario, un dispositivo por reservorio y un solo responsable activo por dispositivo.
-- La creación del código debe rechazarse mientras el perfil no tenga grupo y al menos una asignación reservorio-dispositivo completa.
-- Los rangos deben expresarse como pH y temperatura; no como `minVma`, `maxVma`, `minCrop` y `maxCrop`.
-- El DTO inicial de telemetría no debe exigir turbidez, porque está fuera del alcance actual.
-- La evaluación de una medición es una interacción entre backend y telemetría, no un comando emitido desde las aplicaciones.
-- La vista de proceso debe entregar las acciones permitidas para no duplicar las reglas en Flutter o Angular.
+- La autenticación administrativa devuelve `id`, `identifier`, `organizationId`, `token`, `role` y `expiresAt` opcional.
+- El registro conjunto de empresa y Administrador, la sesión administrativa, las cuentas de Operario y los códigos de primer acceso ya cuentan con rutas mock.
+- Usuarios, grupos, reservorios, dispositivos y perfiles tienen consultas paginadas o de detalle según la necesidad de la web.
+- El Mock API valida un grupo por perfil, vinculaciones exclusivas y un responsable activo por par reservorio-dispositivo.
+- El código solo se genera cuando la cuenta está activa, el perfil está `PENDING_FIRST_ACCESS` y existe una asignación activa completa.
 - El alta de dispositivo responde `{ device, activationCredential }`; `activationCredential` se muestra una vez y no forma parte de `DeviceDto`.
 - `DeviceDto` incluye `identityStatus`; la revocación utiliza `POST /api/v1/device-identities/{deviceId}/revoke`.
-- Flutter registra su token FCM mediante el contrato de Monitoring y navega desde la notificación solo después de validar sesión y asignación.
-- Monitoring necesita endpoints de consulta; los endpoints internos de creación de alertas y correlación no deben ser invocados por las aplicaciones.
+- Telemetry expone resumen global, detalle, última medición e historial sin exigir turbidez.
+- Treatment expone listados y detalles de solo lectura para el Administrador.
+- Monitoring expone estado, alertas, incidentes, trazabilidad y generación inmediata de reportes.
+
+### Contratos móviles implementados en el Mock API
+
+- `POST /api/v1/authentication/operator-first-access` consume el código y devuelve sesión `OPERATOR`.
+- `POST /api/v1/authentication/sign-in` y `sign-out` son compartidos por rol; Flutter rechaza cualquier sesión que no sea `OPERATOR`.
+- `GET /api/v1/operator/context` proyecta perfil, grupo, miembros y asignaciones desde el token.
+- `GET|PUT /api/v1/operator/assignments/{id}/configuration` y `POST .../publish` administran el borrador y publicación por asignación.
+- `GET /api/v1/operator/devices/{id}/telemetry` devuelve disponibilidad, última lectura e historial.
+- `GET /api/v1/operator/treatments` y `POST /api/v1/operator/treatments/{id}/commands` exponen estados y `allowedActions`.
+- `GET /api/v1/operator/alerts`, `PATCH .../{id}/acknowledge` y `GET /api/v1/operator/devices/{id}/history` cubren Monitoring móvil.
+
+Todas las rutas `/operator` validan la sesión y vuelven a comprobar que el recurso pertenezca a una asignación activa. Siguen pendientes del backend real las garantías productivas —transacciones, hash, almacenamiento seguro, renovación de sesión, idempotencia y persistencia durable— y FCM.
 
 ## 13. Estados de presentación
 
@@ -824,37 +922,38 @@ Para comandos deben utilizarse estados separados:
 
 ### P-01 — Preparación compartida
 
-- Acordar contratos y enumeraciones.
-- Incorporar grupo, reservorio, Perfil de Operario, asignación y código de primer acceso.
-- Crear `mock-api/db.json` y escenarios iniciales.
-- Definir variables de entorno para ambas aplicaciones.
+- Congelar las enumeraciones y DTO compartidos indicados en esta guía.
+- Implementar en el Mock API el primer acceso, la sesión `OPERATOR` y las consultas limitadas por asignación.
+- Completar el contrato de configuración operativa y los comandos de Treatment requeridos por Flutter.
+- Preparar fixtures móviles sin acceder a `db.json` desde la aplicación.
+- Definir variables de entorno para Flutter.
 
 ### P-02 — Base Flutter
 
-- Crear proyecto, tema y navegación; configurar Retrofit, Dio como transporte interno, serialización y generación de código.
+- Crear proyecto, tema y navegación; agregar `http: ^1.6.0`, configurar `HydroGuardHttpClient`, serialización y variables por ambiente.
 - Incorporar BLoC y estructura por feature.
-- Implementar autenticación de Operario.
+- Implementar repositorios y fallos compartidos sin reglas de negocio en widgets o BLoC.
 
-### P-03 — Base Angular
+### P-03 — Acceso y contexto del Operario
 
-- Crear proyecto, tema Angular Material, layout y Router.
-- Configurar Axios y estructura DDD por contexto.
-- Implementar autenticación de Administrador.
+- Implementar primer acceso, login posterior, restauración y cierre de sesión.
+- Mostrar perfil, grupo, miembros visibles y asignaciones propias.
+- Bloquear sesiones cuyo rol no sea `OPERATOR`.
 
 ### P-04 — Configuración por rol
 
 - Flutter: selector de reservorio y configuración operativa de cada asignación.
-- Angular: grupos, reservorios, dispositivos, perfiles de Operario, códigos y asignaciones exclusivas.
+- Mantener Angular como referencia de la estructura ya creada; no duplicar sus capacidades administrativas en Flutter.
 
 ### P-05 — Telemetría y tratamiento
 
 - Flutter: telemetría propia y acciones operativas.
-- Angular: telemetría y procesos globales en modo supervisión.
+- Validar que `allowedActions` gobierne aprobación, liberación, emergencia y restablecimiento.
 
 ### P-06 — Monitoreo y trazabilidad
 
 - Flutter: alertas e historial del dispositivo.
-- Angular: alertas, incidentes, trazabilidad y reportes globales.
+- Registrar el token FCM cuando exista sesión y eliminarlo o invalidarlo al cerrar sesión.
 
 ### P-07 — Refinamiento
 
@@ -869,23 +968,38 @@ Una funcionalidad se considera completada cuando:
 - Está implementada en la aplicación correspondiente al rol.
 - No expone acciones reservadas a la otra aplicación.
 - Utiliza el patrón definido: BLoC en Flutter o DDD por contexto en Angular.
-- Consume un repositorio o puerto; la UI nunca accede directamente a Retrofit, Dio, Axios o `db.json`.
+- Consume un repositorio o puerto; la UI nunca accede directamente a `http.Client`, Axios o `db.json`.
 - Puede funcionar con el mock sin cambiar componentes o widgets.
 - Incluye carga, vacío, desconexión, error y falta de permisos.
 - Impide dobles envíos y confirma acciones críticas.
-- Mantiene nombres y estados coherentes con el README.
+- Mantiene los valores contractuales definidos en esta guía y el significado de dominio establecido en el README.
 - Funciona en los tamaños de pantalla previstos para su aplicación.
 - Documenta el recurso mock o endpoint utilizado.
 
 Las pruebas unitarias y la landing page permanecen fuera del sprint actual.
 
-## 16. Decisiones pendientes de refinamiento
+## 16. Decisiones cerradas y pendientes
 
-- Versiones exactas de Angular, Flutter y sus bibliotecas.
-- Repositorios definitivos y estrategia de despliegue de cada aplicación.
-- URL, autenticación y OpenAPI del backend real.
-- Intervalo de polling y criterio de medición vigente.
-- Uso posterior de SSE o WebSocket.
-- Persistencia final de sesión en Flutter.
-- Biblioteca de gráficos, solo si se demuestra que aporta valor frente a tarjetas y tablas.
-- Diseños que deberán formalizarse en Figma después de recibir observaciones.
+### Decisiones cerradas
+
+- La web utiliza Angular 21.2, TypeScript 5.9, Angular Material, Axios 1.20, Node.js 22 y npm 11.
+- La web administrativa se despliega en Vercel y el Mock API académico en Render.
+- Las aplicaciones consumen rutas relativas `/api/v1`; no codifican URLs del mock en componentes o widgets.
+- Flutter utilizará BLoC por feature y `package:http ^1.6.0` mediante un cliente compartido; los DTO permanecerán separados de las entidades y podrán usar `json_serializable`.
+- Administrador y Operario utilizan aplicaciones independientes.
+- El primer acceso requiere identificador, contraseña definitiva y código; no obliga a cambiar la contraseña.
+- La comunicación del dispositivo y Edge utiliza HTTPS/REST; MQTT queda fuera del alcance.
+- Treatment decide conformidad y acciones permitidas; las aplicaciones no reproducen esas reglas.
+- FCM será el transporte de notificaciones móviles y Monitoring conservará la alerta como fuente de verdad.
+
+### Decisiones pendientes para integración productiva
+
+- Versión estable exacta de Flutter/Dart y versiones compatibles de `flutter_bloc`, `json_serializable`, `build_runner` y almacenamiento seguro. La versión HTTP queda fijada en `http: ^1.6.0`.
+- Repositorio definitivo, identificador de paquete y estrategia de distribución de la aplicación móvil.
+- URL, autenticación definitiva y especificación OpenAPI del backend real.
+- Intervalo de polling y criterio definitivo de medición vigente; hasta entonces deben ser configurables.
+- Evaluación posterior de SSE o WebSocket; no son requisito para el primer incremento móvil.
+- Estrategia final de persistencia y renovación de sesión en Flutter.
+- Configuración de proyecto Firebase y ciclo de registro/invalidez de tokens FCM.
+- Biblioteca de gráficos, solo si aporta valor frente a tarjetas y listas.
+- Diseños que deberán formalizarse en Figma después de validar los flujos funcionales.

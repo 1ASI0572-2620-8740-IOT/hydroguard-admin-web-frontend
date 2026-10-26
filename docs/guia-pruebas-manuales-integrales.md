@@ -944,12 +944,7 @@ Si se valida el despliegue, complete además esta comprobación mínima:
 
 ### Aplicación móvil del Operario
 
-- Consumir el código de primer acceso.
-- Iniciar sesión desde Flutter.
-- Consultar únicamente sus asignaciones.
-- Completar y publicar configuraciones.
-- Aprobar la estrategia de tratamiento.
-- Liberar, detener o restablecer un proceso.
+Ya están disponibles contra el Mock API: primer acceso, login, perfil y grupo, asignaciones propias, telemetría, borrador y publicación de configuración, acciones permitidas de Treatment, atención de alertas e historial. Permanecen pendientes la persistencia segura de sesión entre reinicios, polling automático, FCM y la integración con el backend productivo.
 
 ### Dispositivo y Edge
 
@@ -1002,4 +997,121 @@ La aplicación web actual se considera validada cuando una persona puede:
 9. Ejecutar bajas lógicas respetando dependencias.
 10. Recuperarse de errores de red y utilizar la interfaz en pantalla pequeña.
 
-Superar estas pruebas valida el frontend administrativo, incluida la supervisión de Treatment, y sus contratos mock. No demuestra todavía el funcionamiento físico del ESP32, la capa Edge en la laptop, Flutter, el motor backend de Treatment, FCM ni el backend productivo futuro.
+Superar estas pruebas valida el frontend administrativo, el frontend móvil del Operario y sus contratos mock. No demuestra todavía el funcionamiento físico del ESP32, la capa Edge en la laptop, el motor backend productivo de Treatment, FCM ni el backend real futuro.
+
+## 19. Preparación local de la aplicación móvil
+
+Use una copia descartable de `db.json` como se indica en 2.2. Para aceptar conexiones desde un emulador o teléfono, inicie el mock así:
+
+```powershell
+cd C:\Users\jhect\OneDrive\Documentos\GitHub\IOT\mock-api
+$env:HOST='0.0.0.0'
+$env:MOCK_DB_PATH="$env:TEMP\hydroguard-manual-db.json"
+Copy-Item .\mock-api\db.json $env:MOCK_DB_PATH -Force
+npm run mock:api
+```
+
+En otra terminal:
+
+```powershell
+cd C:\Users\jhect\OneDrive\Documentos\GitHub\IOT\hydroguard_operator_mobile_frontend
+flutter pub get
+flutter run --dart-define=HYDROGUARD_API_URL=http://10.0.2.2:3000/api/v1
+```
+
+`10.0.2.2` corresponde al emulador Android. En un teléfono físico conectado a la misma red, sustitúyalo por la IPv4 de la laptop, por ejemplo `http://192.168.1.25:3000/api/v1`. Windows Firewall debe permitir el puerto 3000. La app nunca lee `db.json` directamente.
+
+Datos móviles de demostración:
+
+| Caso | Identificador | Contraseña | Código |
+|:--|:--|:--|:--|
+| Login ya activado | `marcelino.valencia` | `operadorpassword123` | No aplica |
+| Primer acceso pendiente | `carlos.mendoza` | `operadorpassword123` | `HG-31Z8P9` |
+| Rol incorrecto | `admin.hidro@hydroguard.pe` | `adminpassword123` | No aplica |
+
+Cada reinicio desde cero requiere detener el mock, volver a copiar la semilla sobre `$env:MOCK_DB_PATH` y arrancarlo otra vez. Reiniciar solo Flutter no restaura los códigos ni estados mutados.
+
+## 20. Flujo integrado Admin Web → Operador Mobile
+
+### 20.1 Preparación administrativa
+
+1. Abra Angular en `http://127.0.0.1:4200`.
+2. Inicie sesión con `admin.hidro@hydroguard.pe` y `adminpassword123`.
+3. Abra Operarios y localice a **Carlos Mendoza**.
+4. Compruebe que su perfil pertenece a **Módulo Hidropónico Pachacámac**, tiene la asignación `asgn-4`, reservorio **Tanque Nutritivo Berros NFT-B**, dispositivo `dev-202` y código activo `HG-31Z8P9`.
+5. Mantenga la sesión web abierta. No regenere ni revoque el código.
+
+Propósito: demostrar que el Administrador prepara identidad, grupo, dispositivo y asignación antes de entregar el acceso.
+
+### 20.2 Primer acceso y aislamiento por rol
+
+1. En Flutter, pulse **Primer acceso de operario**.
+2. Ingrese `carlos.mendoza`, `operadorpassword123` y `HG-31Z8P9`.
+3. Confirme. Debe abrirse el panel del Operario.
+4. Cierre sesión e intente entrar con la cuenta administradora hidropónica.
+
+Resultados esperados:
+
+- El código pasa a usado y no puede consumirse por segunda vez.
+- Carlos solo ve su grupo y su propia asignación.
+- La cuenta `ADMINISTRATOR` es rechazada por la aplicación móvil.
+- Identificador, contraseña o código incorrectos producen un error y no crean sesión.
+
+### 20.3 Grupo, asignación y telemetría
+
+1. Inicie sesión nuevamente como Carlos.
+2. Abra **Mi grupo**: debe ver el grupo hidropónico y sus miembros activos, sin funciones para administrarlos.
+3. Abra **Mis reservorios** y expanda **Tanque Nutritivo Berros NFT-B**.
+4. Verifique dispositivo `dev-202`, disponibilidad `OFFLINE`, última lectura de pH y temperatura y fecha de medición.
+
+Variante negativa: la API debe devolver `403` si la sesión de Carlos intenta consultar `dev-101`, porque pertenece a otra organización y asignación. Este caso se valida por contrato; no se fuerza desde la interfaz.
+
+### 20.4 Configuración operativa
+
+1. Abra **Configuración** y seleccione el reservorio de Carlos.
+2. Ingrese: pH mínimo `5.5`, pH máximo `6.5`, temperatura mínima `18`, máxima `25`, acción `Reducir temperatura y representar actuación con LED`, espera `10`, máximo de ciclos `2` y liberación `MANUAL`.
+3. Pulse **Guardar borrador** y espere el mensaje de éxito.
+4. Cambie pH mínimo por `7` y pH máximo por `6`; confirme que el servidor rechaza el rango.
+5. Restaure `5.5` y `6.5`, guarde y pulse **Publicar**.
+
+Resultado esperado: existe una sola versión publicada vigente para el dispositivo y la web administrativa puede consultarla, pero no editarla.
+
+### 20.5 Treatment gobernado por `allowedActions`
+
+1. Abra **Tratamiento**.
+2. Localice el proceso de Carlos en estado `PENDING_CORRECTION_APPROVAL`.
+3. Compruebe que aparece **Aprobar estrategia** y pulse una sola vez.
+4. Actualice: el estado debe cambiar a `CORRECTING` y la aprobación a `APPROVED`.
+5. En otro proceso apto, verifique que **Autorizar liberación** solo aparece si el estado es `READY` y el modo es manual.
+6. Compruebe que **Emergencia** no aparece en procesos completados.
+
+Propósito: la app muestra y ejecuta acciones calculadas por Treatment; no decide localmente si el agua es apta.
+
+### 20.6 Alertas, historial y cierre de sesión
+
+1. Abra **Alertas** y ubique la alerta crítica de `dev-202`.
+2. Pulse **Atender**. Su estado debe cambiar de `ACTIVE` a `ACKNOWLEDGED`; repetir la acción ya no debe ser posible.
+3. Abra **Historial**, seleccione el reservorio y compruebe la secuencia de eventos y la cantidad de reportes disponibles.
+4. Cierre sesión. Las rutas privadas deben volver al login.
+5. Inicie sesión con Carlos sin código: `carlos.mendoza` y `operadorpassword123`.
+
+## 21. Verificación cruzada desde la web
+
+Sin reiniciar el mock, vuelva a Angular:
+
+1. Actualice el perfil de Carlos y confirme que está activo y el código figura usado.
+2. Consulte la configuración de `dev-202` y confirme los rangos publicados desde Flutter.
+3. Abra Treatment y confirme que el proceso aprobado desde el móvil ahora está en corrección.
+4. Abra Monitoring y verifique que la alerta atendida ya no figura activa.
+5. Abra trazabilidad para `dev-202` y compruebe que los datos siguen limitados a la organización hidropónica.
+
+Esto demuestra que ambas aplicaciones trabajan sobre los mismos recursos y que sus responsabilidades no se duplican: la web prepara y supervisa; el móvil opera sobre asignaciones autorizadas.
+
+## 22. Límites de esta demostración integrada
+
+- La sesión móvil vive en memoria y se pierde al cerrar completamente la aplicación.
+- No existe polling, WebSocket ni FCM; cada vista actualiza al abrirse o mediante su botón de recarga.
+- Los comandos modifican escenarios mock; no accionan ESP32, válvulas, dosificación ni LED reales.
+- Edge, identidad técnica real y telemetría física continúan pendientes.
+- Los reportes móviles solo se consultan si ya existen; su generación sencilla corresponde a la web.
+- `db.json` contiene contraseñas de demostración en texto claro; esto no es válido para producción.
