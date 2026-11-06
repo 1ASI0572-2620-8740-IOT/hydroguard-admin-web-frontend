@@ -1,5 +1,10 @@
 # HydroGuard Admin Web
 
+Integración local 05/11/2026: `npm start` utiliza el Gateway real en 8080 mediante
+`proxy.conf.json`. El recorrido sin Mock API, incluyendo Flutter, Edge y ESP32,
+está en [la guía integral local](../hydroguard_backend/docs/local-end-to-end.md).
+Las instrucciones anteriores basadas en fixtures se conservan solo para pruebas con mock.
+
 Aplicación web multiempresa para la administración de identidades y accesos de HydroGuard. En el alcance actual permite registrar una empresa con su única cuenta administradora, autenticar al administrador, crear y desactivar cuentas de operarios, consultar sus vínculos operativos y gestionar códigos de primer acceso.
 
 El bounded context de configuración operativa (BC-02) permite administrar grupos, reservorios, dispositivos, vinculaciones exclusivas y perfiles de Operario con asignaciones e historial. La creación de una cuenta continúa hacia su perfil y código de primer acceso. La web también consulta borradores, versiones publicadas y compatibilidad de configuraciones, sin editarlas.

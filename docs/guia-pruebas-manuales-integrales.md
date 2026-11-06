@@ -1,5 +1,17 @@
 # Guía unificada de pruebas manuales — HydroGuard Admin Web
 
+## Recorrido vigente sin Mock API — 05/11/2026
+
+Para comprobar el sistema real completo, utilizar [la guía integral local](../../hydroguard_backend/docs/local-end-to-end.md):
+incluye arranque, empresa/Admin desde cero, catálogo, primer acceso móvil,
+publicación/aplicación, lectura del ESP32, aprobación, espera, liberación, Monitoring
+y excepciones. No mezclar los datos de PostgreSQL con las fixtures descritas abajo.
+El proxy local de Angular ya apunta a Gateway 8080 y Flutter al mismo backend.
+
+Los apartados siguientes se conservan como guía histórica para pruebas **con mock**.
+Sus credenciales, seeds, reinicios y comandos de simulación no aplican a la ejecución
+real. En ella no hay datos predeterminados y reiniciar no elimina lo registrado.
+
 Esta guía permite probar, paso a paso, todo lo que está implementado actualmente en la aplicación web del Administrador. Está escrita para una persona que no conoce internamente el proyecto y distingue expresamente entre funciones reales del frontend, respuestas simuladas por el mock y funciones todavía pendientes.
 
 ## 1. Alcance actual
