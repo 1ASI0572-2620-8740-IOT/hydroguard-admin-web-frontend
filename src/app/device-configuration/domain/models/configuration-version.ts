@@ -2,7 +2,7 @@ export interface ConfigurationVersion {
   readonly id: string;
   readonly deviceId: string;
   readonly configurationVersion: number;
-  readonly status: 'DRAFT' | 'PUBLISHED';
+  readonly status: 'DRAFT' | 'PUBLISHED' | 'SUPERSEDED';
   readonly compatible: boolean;
   readonly incompatibilityReasons: ReadonlyArray<string>;
   readonly createdAt: string;

@@ -1,4 +1,5 @@
 export type TreatmentState =
+  | 'PREPARING'
   | 'NOT_STARTED'
   | 'MEASURING'
   | 'EVALUATING'
