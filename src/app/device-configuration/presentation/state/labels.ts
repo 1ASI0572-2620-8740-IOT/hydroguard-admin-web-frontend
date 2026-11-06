@@ -33,6 +33,7 @@ const labels: Readonly<Record<string, string>> = {
   RESERVOIR: 'Reservorio',
   DRAFT: 'Borrador',
   PUBLISHED: 'Publicada',
+  SUPERSEDED: 'Sustituida',
   MANUAL: 'Manual',
   AUTOMATIC: 'Automática',
 };

@@ -96,7 +96,7 @@ export interface ConfigurationVersionDto {
   id: string;
   deviceId: string;
   configurationVersion: number;
-  status: 'DRAFT' | 'PUBLISHED';
+  status: 'DRAFT' | 'PUBLISHED' | 'SUPERSEDED';
   compatible: boolean;
   incompatibilityReasons?: string[];
   createdAt: string;
