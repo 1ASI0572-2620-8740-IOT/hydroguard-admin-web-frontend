@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 const LABELS: Readonly<Record<string, string>> = {
+  PREPARING: 'Preparando unidad',
   NOT_STARTED: 'Sin iniciar',
   MEASURING: 'Midiendo',
   EVALUATING: 'Evaluando',
