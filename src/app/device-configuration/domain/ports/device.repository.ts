@@ -5,6 +5,7 @@ export abstract class DeviceRepository {
   abstract list(query: DeviceQuery, signal?: AbortSignal): Promise<Page<Device>>;
   abstract get(id: string, signal?: AbortSignal): Promise<DeviceDetail>;
   abstract create(request: CreateDevice): Promise<RegisteredDevice>;
+  abstract updateDescription(id: string, alias: string, deviceModel: string): Promise<void>;
   abstract revokeIdentity(id: string): Promise<void>;
   abstract link(id: string, reservoirId: string): Promise<void>;
   abstract unlink(id: string): Promise<void>;

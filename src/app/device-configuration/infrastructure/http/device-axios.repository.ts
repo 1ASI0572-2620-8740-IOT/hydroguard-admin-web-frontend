@@ -38,6 +38,12 @@ export class DeviceAxiosRepository implements DeviceRepository {
     });
     return { device: mapDevice(data.device), activationCredential: data.activationCredential };
   }
+  async updateDescription(id: string, alias: string, deviceModel: string) {
+    await apiClient.patch('/v1/devices/' + encodeURIComponent(id) + '/description', {
+      alias,
+      deviceModel,
+    });
+  }
   async revokeIdentity(id: string) {
     await apiClient.post('/v1/device-identities/' + encodeURIComponent(id) + '/revoke');
   }

@@ -14,6 +14,49 @@
       <a mat-flat-button [routerLink]="['/devices', id, 'configurations']">Ver configuraciones</a>
     </header>
     <div class="panel">
+      <h2>Datos descriptivos</h2>
+      <p>
+        El alias y el modelo se pueden corregir sin cambiar la identidad ni los vínculos del
+        dispositivo.
+      </p>
+      @if (editingDescription()) {
+        <form [formGroup]="descriptionForm" (ngSubmit)="saveDescription()">
+          <mat-form-field appearance="outline">
+            <mat-label>Alias</mat-label>
+            <input matInput formControlName="alias" maxlength="100" required />
+            <mat-error><hg-field-error [control]="descriptionForm.controls.alias" /></mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Modelo</mat-label>
+            <input matInput formControlName="deviceModel" maxlength="80" required />
+            <mat-error
+              ><hg-field-error [control]="descriptionForm.controls.deviceModel"
+            /></mat-error>
+          </mat-form-field>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="actions.submitting()">Guardar</button>
+            <button
+              mat-button
+              type="button"
+              [disabled]="actions.submitting()"
+              (click)="editingDescription.set(false)"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      } @else {
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="actions.submitting() || state.loading()"
+          (click)="editDescription()"
+        >
+          Editar alias y modelo
+        </button>
+      }
+    </div>
+    <div class="panel">
       <dl>
         <dt>Estado administrativo</dt>
         <dd>{{ data.device.lifecycleStatus | configurationLabel }}</dd>
@@ -104,11 +147,7 @@
       </button>
     }
     @if (data.device.identityStatus !== 'REVOKED') {
-      <button
-        mat-stroked-button
-        [disabled]="actions.submitting()"
-        (click)="revokeDeviceIdentity()"
-      >
+      <button mat-stroked-button [disabled]="actions.submitting()" (click)="revokeDeviceIdentity()">
         Revocar identidad técnica
       </button>
     }
