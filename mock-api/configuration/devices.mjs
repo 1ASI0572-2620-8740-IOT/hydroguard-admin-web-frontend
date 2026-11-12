@@ -128,6 +128,28 @@ export const handleDevices = ({ method, parts, url, body, db, organizationId }) 
         },
       };
     }
+    if (parts.length === 3 && parts[2] === 'description' && method === 'PATCH') {
+      if (
+        !body ||
+        typeof body !== 'object' ||
+        Array.isArray(body) ||
+        Object.keys(body).some((key) => key !== 'alias' && key !== 'deviceModel')
+      )
+        fail(400, 'Datos no validos.');
+      const alias = typeof body.alias === 'string' ? body.alias.trim() : '';
+      const deviceModel = typeof body.deviceModel === 'string' ? body.deviceModel.trim() : '';
+      if (
+        alias.length < 3 ||
+        alias.length > 100 ||
+        deviceModel.length < 3 ||
+        deviceModel.length > 80
+      )
+        fail(400, 'Datos no validos.');
+      device.alias = alias;
+      device.deviceModel = deviceModel;
+      device.updatedAt = new Date().toISOString();
+      return { status: 204, changed: true };
+    }
     if (parts.length === 3 && parts[2] === 'link' && method === 'POST') {
       const reservoir = requireActive(
         find(db.reservoirs, textField(body, 'reservoirId'), organizationId),

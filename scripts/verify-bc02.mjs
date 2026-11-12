@@ -231,6 +231,34 @@ try {
     { reservoirId: reservoirB.id },
     409,
   );
+  const descriptionPath = '/devices/' + deviceA.id + '/description';
+  const metadata = { alias: '  Alias corregido  ', deviceModel: '  Modelo corregido  ' };
+  await request('PATCH', descriptionPath, null, metadata, 401);
+  await request('PATCH', descriptionPath, operatorSession.token, metadata, 403);
+  await request('PATCH', descriptionPath, hydroponic, metadata, 404);
+  await request('PATCH', descriptionPath, textile, { ...metadata, alias: ' a ' }, 400);
+  await request(
+    'PATCH',
+    descriptionPath,
+    textile,
+    { ...metadata, deviceModel: 'm'.repeat(81) },
+    400,
+  );
+  await request('PATCH', descriptionPath, textile, { ...metadata, capabilities: [] }, 400);
+  await request('PATCH', descriptionPath, textile, metadata, 204);
+  const renamed = (await request('GET', '/devices/' + deviceA.id, textile)).device;
+  assert.equal(renamed.alias, 'Alias corregido');
+  assert.equal(renamed.deviceModel, 'Modelo corregido');
+  assert.equal(renamed.id, deviceA.id);
+  assert.equal(renamed.serialNumber, deviceA.serialNumber);
+  assert.equal(renamed.reservoirId, reservoirA.id);
+  assert.equal(renamed.identityStatus, deviceA.identityStatus);
+  assert.deepEqual(renamed.capabilities, deviceA.capabilities);
+  const byAlias = await request('GET', '/devices?searchTerm=Alias%20corregido', textile);
+  assert.deepEqual(
+    byAlias.items.map((device) => device.id),
+    [deviceA.id],
+  );
   const unlinked = (await createDevice('BC02-DEVICE-D')).device;
   await request(
     'POST',
