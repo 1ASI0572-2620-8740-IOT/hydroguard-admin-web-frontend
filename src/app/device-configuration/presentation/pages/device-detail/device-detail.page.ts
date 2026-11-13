@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { ConfigurationLabelPipe } from '../../state/labels';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { DeviceDetail } from '../../../domain/models/details';
 import { OperationalOptions } from '../../../domain/models/operational-catalog';
@@ -20,6 +21,9 @@ import { UnlinkDeviceUseCase } from '../../../application/use-cases/unlink-devic
 import { DeactivateDeviceUseCase } from '../../../application/use-cases/deactivate-device.use-case';
 import { GetOperationalOptionsUseCase } from '../../../application/use-cases/get-operational-options.use-case';
 import { RevokeDeviceIdentityUseCase } from '../../../application/use-cases/revoke-device-identity.use-case';
+import { UpdateDeviceDescriptionUseCase } from '../../../application/use-cases/update-device-description.use-case';
+import { FieldErrorComponent } from '../../components/field-error/field-error.component';
+import { notBlank } from '../../state/form-validators';
 @Component({
   selector: 'hg-device-detail-page',
   standalone: true,
@@ -32,7 +36,9 @@ import { RevokeDeviceIdentityUseCase } from '../../../application/use-cases/revo
     DatePipe,
     ReactiveFormsModule,
     MatFormFieldModule,
+    MatInputModule,
     MatSelectModule,
+    FieldErrorComponent,
   ],
   providers: [PageActions],
   templateUrl: './device-detail.page.html',
@@ -48,14 +54,27 @@ export class DeviceDetailPage implements OnInit {
   private readonly deactivate = inject(DeactivateDeviceUseCase);
   private readonly getOptions = inject(GetOperationalOptionsUseCase);
   private readonly revokeIdentity = inject(RevokeDeviceIdentityUseCase);
+  private readonly updateDescription = inject(UpdateDeviceDescriptionUseCase);
   readonly state = new QueryState<DeviceDetail>();
   readonly options = new QueryState<OperationalOptions>();
   readonly form = inject(FormBuilder).nonNullable.group({ reservoirId: ['', Validators.required] });
+  readonly editingDescription = signal(false);
+  readonly descriptionForm = inject(FormBuilder).nonNullable.group({
+    alias: [
+      '',
+      [Validators.required, notBlank, Validators.minLength(3), Validators.maxLength(100)],
+    ],
+    deviceModel: [
+      '',
+      [Validators.required, notBlank, Validators.minLength(3), Validators.maxLength(80)],
+    ],
+  });
   get id() {
     return this.route.snapshot.paramMap.get('deviceId') ?? '';
   }
   ngOnInit() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.editingDescription.set(false);
       this.state.data.set(null);
       void this.load();
     });
@@ -66,6 +85,32 @@ export class DeviceDetailPage implements OnInit {
       this.state.load((signal) => this.get.execute(id, signal)),
       this.options.load((signal) => this.getOptions.execute(signal)),
     ]);
+  }
+  editDescription() {
+    const device = this.state.data()?.device;
+    if (!device) return;
+    this.descriptionForm.reset({ alias: device.alias, deviceModel: device.deviceModel });
+    this.editingDescription.set(true);
+  }
+  async saveDescription() {
+    if (this.actions.submitting()) return;
+    const controls = this.descriptionForm.controls;
+    controls.alias.setValue(controls.alias.value.trim());
+    controls.deviceModel.setValue(controls.deviceModel.value.trim());
+    if (this.descriptionForm.invalid) {
+      this.descriptionForm.markAllAsTouched();
+      return;
+    }
+    const id = this.id;
+    const { alias, deviceModel } = this.descriptionForm.getRawValue();
+    const saved = await this.actions.run(
+      'Guardar alias y modelo',
+      () => this.updateDescription.execute(id, alias, deviceModel),
+      () => this.load(),
+      undefined,
+      this.descriptionForm,
+    );
+    if (saved && this.id === id) this.editingDescription.set(false);
   }
   async link() {
     if (this.form.invalid) {
